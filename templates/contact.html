@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Contact</h1>
+    <div class="content-section">
+        <form method="POST" action="/process">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <div class="form-group">
+
+                    {{ form.message.label(class="form-control-label") }}
+
+                    {% if form.message.errors %}
+                        {{ form.message(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.message.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.message(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+        <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+        </div>
+        </form>
+        <p> Or email us at shirialmog1@gmail.com </p>
+    </div>
+
+{% endblock %}
