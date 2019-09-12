@@ -1,2 +1,2 @@
-def myadd(name, y=3):
+def myadd(name, y=2):
     return name*y
