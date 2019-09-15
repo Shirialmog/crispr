@@ -1,8 +1,9 @@
 from flask import Flask, render_template, url_for, flash, redirect,request,jsonify
-from forms import DNAform, contactForm,crisPAMform
+from forms import DNAform, contactForm,crisPAMform, uploadForm
 from Scripts.BEsingle import MainBE
 from Scripts.seqAnalysis import process_sequence
-import json
+import os
+import secrets
 
 app = Flask(__name__)
 app.config['SECRET_KEY']="3af987093f78a156771d3e00335bd60c"
@@ -36,10 +37,25 @@ def contact():
     form=contactForm()
     return render_template('contact.html',title="contact", form=form)
 
+def save_file(input_field):
+    random_hex=secrets.token_hex(8)
+    f_name, f_ext=os.path.splitext(input_field.filename)
+    filename=random_hex+f_ext
+    filepath=os.path.join(app.root_path, "user_files",filename)
+    input_field.save(filepath)
+
 
 @app.route('/upload',methods=['GET', 'POST'])
 def upload():
-    return render_template('upload.html')
+    form=uploadForm()
+    result=''
+    if form.validate_on_submit():
+        save_file(form.inputFile.data)
+        result="123"
+    elif request.method=='GET':
+        result='1'
+
+    return render_template('upload.html',form=form,result=result)
 
 @app.route('/crisPAM', methods=['GET','POST'])
 def crisPAM():

@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, SubmitField, SelectField, BooleanField
 from wtforms.validators import DataRequired, Length
 
@@ -20,3 +21,7 @@ class crisPAMform(FlaskForm):
     referencePAM = StringField("Enter reference Sequence here:", validators=[DataRequired(),Length(min=25)])
     variantPAM = StringField("Enter variant Sequence here:", validators=[DataRequired(),Length(min=25)])
     submit = SubmitField('Enter')
+
+class uploadForm(FlaskForm):
+    inputFile=FileField('Upload file here', validators=[FileAllowed(['csv'])])
+    submit=SubmitField('Upload')
