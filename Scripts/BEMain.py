@@ -1,8 +1,10 @@
-from BEseqType import *
+from Scripts.BEseqType import *
 from Bio.Seq import Seq
 import csv
-from baseEditors import CBElist, CBElistMinor, ABElist, ABElistMinor, BEletter
+from Scripts.baseEditors import CBElist, CBElistMinor, ABElist, ABElistMinor, BEletter
 
+def myadd2(name, y=2):
+    return name*y
 
 def importSNPS(SNPfile):
     rslts=[]

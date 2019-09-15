@@ -2,7 +2,7 @@
 from Scripts.casDBFile import * #in production add : Scripts.
 from Scripts.seqType import *
 from Scripts.seqTools import *
-from Scripts.Main import *
+from Scripts.main import *
 #libraries:
 from Bio.pairwise2 import *
 

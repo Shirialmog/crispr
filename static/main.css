@@ -5,7 +5,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #444444;
+  color: #142063;
 }
 
 .bg-steel {
@@ -27,12 +27,15 @@ h1, h2, h3, h4, h5, h6 {
 .content-section {
   background: #ffffff;
   padding: 10px 20px;
-  margin: 5px;
-  border: 1px solid #dddddd;
+  border: 3px solid #dddddd;
   border-radius: 3px;
   margin-bottom: 20px;
 }
 
+.center_div{
+    margin: 0 auto;
+    width:32% /* value of your choice which suits your alignment */
+}
 .article-title {
   color: #444444;
 }

@@ -1,76 +1,123 @@
 {% extends "layout.html" %}
 {% block content %}
-    <div class="row">
-    <div class="content-section col-md-8">
+    <div class="content-section col-md-12">
         <form method="POST" action="" novalidate>
             {{ form.hidden_tag() }}
-            <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Check BE match</legend>
-                <div class="form-group">
-                    {{ form.downSeq.label(class="form-control-label") }}
+            <fieldset class="form-group div">
+                <legend class="border-bottom mb-4">Base Editors Finding Tool</legend>
+                <h6> How this tool works:</h6>
+                <p> By inserting a reference and variant SNP, the code first scans the DNA strand for all the possible PAMs that correspond to the base editors that can correct the mutation.
+                If such PAMs are found, the code then checks if the specific PAM and BE result in a "clean" correction, i.e. no other nucleotides around the mutation
+                are also affected. Finally, we also check the possibility that other nucleotides are being affected yet the final amino acid sequence is not.
+                (This is only available if the reading frame is known)</p>
+                <h6> Insert the following: </h6>
+                <p> Downstream sequence: at least 25 nt <br>
+                    Reference Allele: <br>
+                    Variant Allele: <br>
+                    Upstream sequence: at least 25 nt<br>
+                    Legal letters: A,G,T,C,a,g,t,c <br>
+                    Reading Frame: 1/2/3 (Optional) </p>
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group pt-4">
+                            {% if form.upSeq.errors %}
+                                {{ form.upSeq(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.upSeq.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.upSeq(class="form-control", placeholder="Upstream Sequence") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            {% if form.WT.errors %}
+                                {{ form.WT(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.WT.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.WT(class="form-control", placeholder="Reference", maxlength="1" ) }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {% if form.mutation.errors %}
+                                {{ form.mutation(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.mutation.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.mutation(class="form-control",placeholder="Variant",maxlength="1") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-5 ">
+                        <div class="form-group pt-4" >
+                            {% if form.downSeq.errors %}
+                                {{ form.downSeq(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.downSeq.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.downSeq(class="form-control", placeholder="Downstream Sequence") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
 
-                    {% if form.downSeq.errors %}
-                        {{ form.downSeq(class="form-control is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.downSeq.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.downSeq(class="form-control") }}
-                    {% endif %}
+            <div class="row">
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-success mb-2">View Sample</button>
                 </div>
-                <div class="form-group">
-                    {{ form.upSeq.label(class="form-control-label") }}
-                    {% if form.upSeq.errors %}
-                        {{ form.upSeq(class="form-control is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.upSeq.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.upSeq(class="form-control") }}
-                    {% endif %}
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                   <div class="form-check">
+                       {{ form.showReadingFrame(class="form-check-input") }}
+                       {{ form.showReadingFrame.label(class="form-check-label") }}
+                   </div>
                 </div>
-                <div class="form-group">
-                    {{ form.mutation.label(class="form-control-label") }}
-                    {% if form.mutation.errors %}
-                        {{ form.mutation(class="form-control is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.mutation.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.mutation(class="form-control") }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.WT.label(class="form-control-label") }}
-                    {% if form.WT.errors %}
-                        {{ form.WT(class="form-control is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.WT.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.WT(class="form-control") }}
-                    {% endif %}
-                </div>
+{#                {% if showReadingFrame %}#}
+                    <div class="col-md-2">
+                        {{ form.readingFrame(class="form-control") }}
+                    </div>
+{#                {% endif %}#}
+            </div>
+
+            <br>
+            <div class="form-group">
+            <label for="exampleFormControlFile1">Alternatively, you may upload multiple SNPs in a CSV file, using the following example format</label>
+                <input type="file" class="form-control-file" id="exampleFormControlFile1">
+            </div>
+
             </fieldset>
+
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}
             </div>
         </form>
     </div>
-
-    <div class="content-section col-md-4">
+    <div class="content-section col-md-12">
         <legend class="border-bottom mb-4">Results</legend>
             {% if result %}
-                <div class="alert alert-success wrapit">
-                    {{ result }}
+                <div class="alert alert-primary wrapit">
+                    <div class="content-section col-md-12">
+                        <b>The following base editors will correct this variance (and no other bases around it): </b><br> {{ result[1] }}
+                    </div>
+                    <div class="content-section col-md-12">
+                        <b>The following base editors will correct this variance, but might also "correct" other bases around the variant allele,
+                            however the amino acid  will remain the same (As if only the variant allele was corrected): </b><br> {{ result[2] }}
+                    </div>
                 </div>
             {% endif %}
     </div>

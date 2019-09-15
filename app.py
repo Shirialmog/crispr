@@ -1,6 +1,7 @@
 from flask import Flask, render_template, url_for, flash, redirect,request,jsonify
-from forms import DNAform, contactForm
-from Scripts.process import myadd
+from forms import DNAform, contactForm,crisPAMform
+from Scripts.BEsingle import MainBE
+from Scripts.seqAnalysis import process_sequence
 import json
 
 app = Flask(__name__)
@@ -34,19 +35,33 @@ def about_world():
 def contact():
     form=contactForm()
     return render_template('contact.html',title="contact", form=form)
-@app.route('/process', methods=['post'])
-def process():
-    name=request.form['message']
-    return myadd(name)
+
+
+@app.route('/upload',methods=['GET', 'POST'])
+def upload():
+    return render_template('upload.html')
+
+@app.route('/crisPAM', methods=['GET','POST'])
+def crisPAM():
+    form=crisPAMform()
+    result=''
+    if form.validate_on_submit():
+        result=process_sequence(form.referencePAM.data,form.variantPAM.data)
+    return render_template('crisPAM.html',title='crisPAM',form=form,result=result)
+
 
 @app.route('/input', methods=['GET', 'POST'])
 def input():
     form=DNAform()
-    myresult = ''
+    matches = ''
+    clean = ''
+    quiet = ''
+    readingFrame = 2
+    showReadingFrame = False
     if form.validate_on_submit():
-        myresult = myadd(form.downSeq.data)
-        #return redirect(url_for('hello_world'))
-    return render_template('input.html', title="inputzzz", form=form, result=myresult)
+        matches,clean,quiet = MainBE(form.upSeq.data,form.downSeq.data,form.mutation.data,form.WT.data)
+    return render_template('input.html', title="input", form=form,
+                           result=(matches,clean,quiet), readingFrame=readingFrame, showReadingFrame=showReadingFrame)
 
 if __name__ == '__main__':
     app.run(debug=True)
