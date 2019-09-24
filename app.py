@@ -1,7 +1,9 @@
-from flask import Flask, render_template, url_for, flash, redirect,request,jsonify
+from flask import Flask, render_template, url_for, flash, redirect,request,send_file, send_from_directory
 from forms import DNAform, contactForm,crisPAMform, uploadForm
 from Scripts.BEsingle import MainBE
 from Scripts.seqAnalysis import process_sequence
+from Scripts.BEsiteupload import Mainupload
+from Scripts.writeresults import write_results
 import os
 import secrets
 
@@ -29,13 +31,16 @@ def hello_world():
 @app.route('/blog')
 def hello_world2():
     return render_template('blog.html', posts=posts)
+
 @app.route('/about')
-def about_world():
+def about():
     return render_template('about.html')
+
 @app.route('/contact')
 def contact():
     form=contactForm()
     return render_template('contact.html',title="contact", form=form)
+
 
 def save_file(input_field):
     random_hex=secrets.token_hex(8)
@@ -43,19 +48,38 @@ def save_file(input_field):
     filename=random_hex+f_ext
     filepath=os.path.join(app.root_path, "user_files",filename)
     input_field.save(filepath)
+    return filepath,filename
+
+@app.route('/sample')
+def sample():
+     filepath = os.path.join(app.root_path, "user_files", 'sample_file.csv')
+     print (filepath)
+     return send_file(filepath, attachment_filename='sample_file.csv', as_attachment=True)
+
+@app.route('/download')
+def download():
+     filepath = os.path.join(app.root_path, "user_files", 'full_results.csv')
+     return send_file(filepath, attachment_filename='full_results.csv', as_attachment=True)
 
 
 @app.route('/upload',methods=['GET', 'POST'])
 def upload():
     form=uploadForm()
     result=''
+    filename=''
+    showresults = False
     if form.validate_on_submit():
-        save_file(form.inputFile.data)
-        result="123"
+        filepath,filename=save_file(form.inputFile.data)
+        matches, cleanMatchdic, quietMatchdic, rsltsDic=Mainupload(filepath)
+        write_results(matches, cleanMatchdic, quietMatchdic,rsltsDic,'full_results.csv')
+        showresults=True
+
     elif request.method=='GET':
+        # showresults=False
         result='1'
 
-    return render_template('upload.html',form=form,result=result)
+    return render_template('upload.html',form=form,result=result,
+                           filename='full_results.csv',showresults=showresults)
 
 @app.route('/crisPAM', methods=['GET','POST'])
 def crisPAM():
@@ -69,15 +93,35 @@ def crisPAM():
 @app.route('/input', methods=['GET', 'POST'])
 def input():
     form=DNAform()
-    matches = ''
-    clean = ''
-    quiet = ''
-    readingFrame = 2
-    showReadingFrame = False
+    clean_dic=''
+    quiet_dic=''
+    refSeq=''
+    mutSeq=''
+    origMutSeq=''
+    origRevSeq=''
+    printRevCorSeq=''
+    printPam=''
     if form.validate_on_submit():
-        matches,clean,quiet = MainBE(form.upSeq.data,form.downSeq.data,form.mutation.data,form.WT.data)
-    return render_template('input.html', title="input", form=form,
-                           result=(matches,clean,quiet), readingFrame=readingFrame, showReadingFrame=showReadingFrame)
+        if form.showReadingFrame==False:
+            readingFrame=1
+        else:
+            readingFrame=form.readingFrame.data
+        clean_dic,quiet_dic, refSeq,mutSeq, origMutSeq, origRevSeq, printPam, printRevCorSeq = MainBE(form.upSeq.data,form.downSeq.data,form.mutation.data,form.WT.data,readingFrame)
+    return render_template('input.html', title="input", form=form, result=(clean_dic,quiet_dic,refSeq,mutSeq,origMutSeq, origRevSeq, printPam, printRevCorSeq)) # readingFrame=readingFrame, showReadingFrame=showReadingFrame)
+
+
+@app.route('/download2/<filename>', methods=['GET', 'POST'])
+def download2(filename):
+    return send_from_directory('user_files', filename)
+
+@app.route('/formTable', methods=['POST', 'GET'])
+def formTable():
+    if request.method=='POST':
+        input1=request.form.getE
+        input2 = request.form.table2
+        input3 = request.form.table3
+        input4 = request.form.table4
+        return render_template('formTable.html', result=(input1,input2,input3,input4))
 
 if __name__ == '__main__':
     app.run(debug=True)
