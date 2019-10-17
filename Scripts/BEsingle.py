@@ -39,9 +39,7 @@ def matchBE(snp, BElist):
 def cleanMatch(snp, Matches, BElist,rev):
     printRevSeq=None
     printRevCorSeq=None
-    clean_list=[]
     clean_dic={}
-    quiet_list=[]
     quiet_dic={}
     locations_dic = {}
     locFromEndList = []
@@ -79,54 +77,70 @@ def cleanMatch(snp, Matches, BElist,rev):
         locations_dic[BE]=locations_list
 
         totalSeq1=seq5+snp.mutation+seq3
+        totalSeq2 = seq5 + snp.wt + seq3
         printSeq5=seq5 #for results
-        printSeq3 = seq3  # for results
+        printSeq3=seq3  # for results
         diff=0
         if snp.readingFrame=="1":
             if len(snp.seq5)%3==1:
                 totalSeq1=totalSeq1[1:]
+                totalSeq2 = totalSeq2[1:]
                 printSeq5=printSeq5[1:]
                 diff = 1
             elif len(snp.seq5)%3==2:
                 totalSeq1=totalSeq1[2:]
+                totalSeq2 = totalSeq2[2:]
                 printSeq5 = printSeq5[2:]
                 diff = 2
         elif snp.readingFrame=="2":
             if len(snp.seq5) % 3 == 0:
                 totalSeq1 = totalSeq1[2:]
+                totalSeq2 = totalSeq2[2:]
                 printSeq5 = printSeq5[2:]
                 diff = 2
             elif len(snp.seq5) % 3 == 2:
                 totalSeq1 = totalSeq1[1:]
+                totalSeq2 = totalSeq1[2:]
                 printSeq5=printSeq5[1:]
                 diff = 1
         elif snp.readingFrame=="3":
             if len(snp.seq5) % 3 == 0:
                 totalSeq1 = totalSeq1[1:]
+                totalSeq2 = totalSeq2[1:]
                 printSeq5=printSeq5[1:]
                 diff = 1
             elif len(snp.seq5) % 3 == 1:
                 totalSeq1 = totalSeq1[2:]
+                totalSeq2 = totalSeq2[2:]
                 printSeq5=printSeq5[2:]
                 diff = 2
         if len(totalSeq1)%3==1:
             totalSeq1=totalSeq1[:-1]
+            totalSeq2 = totalSeq2[:-1]
             printSeq3 = printSeq3[:-1]
         if len(totalSeq1)%3==2:
             totalSeq1=totalSeq1[:-2]
+            totalSeq2 = totalSeq2[:-2]
             printSeq3 = printSeq3[:-2]
-        totalSeq2=Seq(totalSeq1)
-
+        totalSeq2=Seq(totalSeq2)
+        print ("total: ", totalSeq2)
         protein_seq=totalSeq2.translate()
+
         max_num = 0
         protein_match=False
-
+        clean_list = []
+        quiet_list=[]
+        origMutSeq = {}
+        printPam = {}
+        printRevCorSeq = {}
+        finalShowSeq = {}
         for loc in locations_dic[BE]:
-            locFromEndList.append(len(printSeq3-loc))
-            temp_seq=totalSeq1
-            loc=loc+len(snp.seq5)
-            activation_window = totalSeq1[loc-end-diff:loc-start]
+            locFromEnd=len(printSeq3)-loc
+            loc=loc+len(printSeq5)
+            #activation_window = totalSeq1[loc-end-diff:loc-start]
+            activation_window=totalSeq1[len(printSeq3)-locFromEnd+len(printSeq5)-end:len(printSeq3)-locFromEnd+len(printSeq5)-start+1]
             num = 0  # number of times the variant appears within the activation window
+            max_num=0
             new_AW = []
             for i in range(len(activation_window)):
                 if activation_window[i]==snp.mutation:
@@ -137,49 +151,55 @@ def cleanMatch(snp, Matches, BElist,rev):
             new_AW=''.join(new_AW)
             if num>max_num:
                 max_num=num
-            finalSeq=totalSeq1[0:loc-end-diff]+new_AW+totalSeq1[loc-start:]
 
 
             if rev==False:
-                oldShowSeq = totalSeq1[0:loc - end - diff] + "[" + activation_window + "]" + totalSeq1[loc - start:]
-                finalShowSeq=totalSeq1[0:loc-end-diff]+"["+new_AW+"]"+totalSeq1[loc-start:]
-                origMutSeq = printSeq5 + "["+snp.mutation+"]" + printSeq3
+                new = new_AW
+                finalSeq = totalSeq1[0:loc - end - diff] + str(new) + totalSeq1[loc - start+1:]
+                print ("Final:", finalSeq)
+                beginningP = Seq(
+                    totalSeq1[0:len(printSeq3) - locFromEnd + len(printSeq5) - end])
+                endP = Seq(totalSeq1[len(printSeq3) - locFromEnd + len(printSeq5) - start + 1:])
+                oldShowSeq = totalSeq1[0:loc - end - diff] + "<b>" + activation_window + "</b>" + totalSeq1[loc - start:]
+                finalShowSeq[loc]=totalSeq1[0:loc-end-diff]+"<b>"+new_AW+"</b>"+totalSeq1[loc-start:]
+                origMutSeq[loc] = printSeq5 + "<b>"+snp.mutation+"</b>" + printSeq3
                 origRevSeq=''
-                printPam = printPamSeq(printSeq5, snp.mutation, printSeq3, locations_dic, BE, PAM)
+                #printPam[loc] = printPamSeq(printSeq5, new_AW, printSeq3, locFromEnd, PAM)
+                printPam[loc] = printPamSeq(beginningP, new_AW, endP, locFromEnd, PAM)
             else:
-                beginningP=Seq(totalSeq1[0:loc - end - diff]).reverse_complement()
+                finalSeq = totalSeq1[0:loc - end - diff] +new_AW + totalSeq1[loc - start+1:]
+                #beginningP=Seq(totalSeq1[0:loc - end - diff]).reverse_complement()
+                beginningP=Seq(totalSeq1[0:len(printSeq3)-locFromEnd+len(printSeq5)-end]).reverse_complement()
                 old_AW=Seq(activation_window).reverse_complement()
                 new_AW=Seq(new_AW).reverse_complement()
-                endP=Seq(totalSeq1[loc - start:]).reverse_complement()
+                #endP=Seq(totalSeq1[loc - start:]).reverse_complement()
+                endP=Seq(totalSeq1[len(printSeq3)-locFromEnd+len(printSeq5)-start+1:]).reverse_complement()
                 oldShowSeq = endP + "<b>" + old_AW + "</b>" + beginningP
-                finalShowSeq = endP + "<b>" + new_AW + "</b>" + beginningP
-                origMutSeq = Seq(printSeq3).reverse_complement() + "<b>" + Seq(snp.mutation).reverse_complement() + "</b>" + Seq(printSeq5).reverse_complement()
+                finalShowSeq[loc] = endP + "<class style='color:blue'><b>" + new_AW + "</b></class>" + beginningP
+                origMutSeq[loc] = Seq(printSeq3).reverse_complement() + "<b>" + Seq(snp.mutation).reverse_complement() + "</b>" + Seq(printSeq5).reverse_complement()
                 origRevSeq=printSeq5+"<b>"+snp.mutation+"</b>"+printSeq3
-                printRevCorSeq= printPamSeq(beginningP.reverse_complement(), new_AW.reverse_complement(), endP.reverse_complement(), locations_dic, BE, PAM)
-                printPam = printPamSeq(beginningP.reverse_complement(), old_AW.reverse_complement(), endP.reverse_complement(), locations_dic, BE, PAM)
-            protein_seq_new=Seq(finalSeq).translate()
+                printRevCorSeq[loc]= printPamSeq(beginningP.reverse_complement(), new_AW.reverse_complement(), endP.reverse_complement(), locFromEnd, PAM)
+                printPam[loc]= printPamSeq(beginningP.reverse_complement(), old_AW.reverse_complement(), endP.reverse_complement(), locFromEnd, PAM)
 
+            protein_seq_new=Seq(finalSeq).translate()
             if protein_seq==protein_seq_new:
                 protein_match=True
 
-        if max_num==1:
-                clean_list.append(BE)
-                clean_dic[BE]=[finalShowSeq,PAM]
-
-        if protein_match==True:
-                quiet_list.append(BE)
-                quiet_dic[BE]=[finalShowSeq,PAM]
-
+            if max_num==1:
+                clean_list.append(loc)
+            if protein_match == True:
+                quiet_list.append(loc)
+        #print (BE, quiet_list)
+        clean_dic[BE]=[origMutSeq,printPam,printRevCorSeq,finalShowSeq,PAM,clean_list,rev]
 
 
+        quiet_dic[BE]=[origMutSeq,printPam,printRevCorSeq,finalShowSeq,PAM, quiet_list,rev]
 
+    return clean_dic,quiet_dic,origMutSeq,origRevSeq,locations_dic
 
-    return clean_dic,quiet_dic,origMutSeq,origRevSeq,printPam,printRevCorSeq
-
-def printPamSeq(seq5,activationWindow,seq3, locations_dic,BE,PAM):
-    for loc in locations_dic[BE]:
-        locEnd=len(seq3)-loc
-        printPAM=seq5+"<b>"+activationWindow+"</b>"+seq3[0:locEnd]+"<b><class style='color:#DD96F0'>"+seq3[locEnd:locEnd+len(PAM)]+"</b></class>"+seq3[locEnd+len(PAM):]
+def printPamSeq(seq5,activationWindow,seq3, locfromEnd,PAM):
+    len3=len(seq3)
+    printPAM=seq5+"<class style='color:blue'><b>"+activationWindow+"</b></class>"+seq3[0:len3-locfromEnd]+"<b><class style='color:#DD96F0'>"+seq3[len3-locfromEnd:len3-locfromEnd+len(PAM)]+"</b></class>"+seq3[len3-locfromEnd+len(PAM):]
     return printPAM
 
 def getRevComp(snp):
@@ -193,6 +213,10 @@ def getRevComp(snp):
     return new_snp
 
 def MainBE(upSeq, downSeq, mutation, wt, readingFrame=2):
+    upSeq=upSeq.upper()
+    downSeq=downSeq.upper()
+    mutation=mutation.upper()
+    wt=wt.upper()
     snp=BEseqType(1234,upSeq, downSeq, wt, mutation, readingFrame, 1, 12, 12)
     refSeq=snp.seq5+"<b>"+snp.wt+"</b>"+snp.seq3
     mutSeq = snp.seq5 + "<b>" + snp.mutation + "</b>" + snp.seq3
@@ -225,8 +249,8 @@ def MainBE(upSeq, downSeq, mutation, wt, readingFrame=2):
     check_match = matchBE(snp, BElist)
 
     # check for clean match
-    clean_dic,quiet_dic,origMutSeq, origRevSeq, printPam, printRevCorSeq= cleanMatch(snp, check_match, BElist,rev)
-
-    return clean_dic, quiet_dic,refSeq,mutSeq, origMutSeq, origRevSeq, printPam, printRevCorSeq
+    clean_dic,quiet_dic,origMutSeq, origRevSeq,locations_dic= cleanMatch(snp, check_match, BElist,rev)
+    #print (clean_dic)
+    return clean_dic, quiet_dic,refSeq,mutSeq, origMutSeq, origRevSeq,locations_dic
 
 

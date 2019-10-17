@@ -1,4 +1,99 @@
 {% extends "layout.html" %}
 {% block content %}
+    <html>
+    <style>
+        body{
+            margin:0;
+        }
+        table {
+            font-family: arial, Sans-Serif;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        td,th{
+            border: 1px solid #0c5460;
+            padding: 8px;
+        }
+
+        th {
+            font-weight: bold;
+        }
+
+        tr:nth-child(even){
+            background-color: #f1b0b7;
+        }
+        tr:hover{
+            background-color: black;
+            color: white;
+        }
+    </style>
+    <script>
+        let sortDir=false;
+        let personData=[
+            {Name: 'Shiri', Age:25},
+            {Name: 'Liron', Age:31},
+            {Name:'Tommy', Age:12},
+            {Name: 'Shiri', Age:25},
+            {Name: 'Liron', Age:31},
+            {Name:'Tommy', Age:12}
+        ];
+
+        window.onload=() => {
+            loadTableData(personData);
+        };
+
+        function loadTableData(personData){
+            const tableBody=document.getElementById('tableData');
+            let dataHtml='';
+
+            for (let person of personData) {
+                dataHtml +=`<tr><td>${person.Name}</td><td>${person.Age}</td></tr>`;
+            }
+            console.log(dataHtml)
+
+            tableBody.innerHTML=dataHtml;
+
+        }
+
+        function sortCol(columnName){
+            const dataType=typeof personData[0][columnName];
+            sortDir=!sortDir;
+
+            switch(dataType){
+                case 'number':
+                    sortNumberColumn(sortDir,columnName);
+                    break;
+                case 'string':
+                    sortNameColumn(sortDir,columnName);
+                    break;
+            }
+            loadTableData(personData)
+        }
+
+        function sortNumberColumn(sort, columnName) {
+            personData = personData.sort((p1, p2) => {
+                return sort ? p1[columnName] - p2[columnName] : p2[columnName] - p1[columnName]
+            })
+        }
+
+        function sortNameColumn(sort, columnName) {
+            personData = personData.sort((p1,p2)=>{
+            return sort ? p1[columnName][0] > p2[columnName][0] : p2[columnName][0] < p1[columnName][0]
+        });
+
+        }
+    </script>
     <h1>About</h1>
+    <body>
+        <table>
+            <thead>
+            <tr>
+                <th onclick="sortCol('Name')"> Name</th>
+                <th onclick="sortCol('Age')"> Age </th>
+            </tr>
+            </thead>
+            <tbody id="tableData"> </tbody>
+        </table>
+    </body>
+    </html>
 {% endblock %}
