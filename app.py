@@ -101,13 +101,16 @@ def input():
     origRevSeq=''
     printRevCorSeq=''
     printPam=''
+    readingFrame=''
+    locations_dic=''
     if form.validate_on_submit():
         if form.showReadingFrame==False:
-            readingFrame=1
+            readingFrame=0
         else:
             readingFrame=form.readingFrame.data
-        clean_dic,quiet_dic, refSeq,mutSeq, origMutSeq, origRevSeq, printPam, printRevCorSeq = MainBE(form.upSeq.data,form.downSeq.data,form.mutation.data,form.WT.data,readingFrame)
-    return render_template('input.html', title="input", form=form, result=(clean_dic,quiet_dic,refSeq,mutSeq,origMutSeq, origRevSeq, printPam, printRevCorSeq)) # readingFrame=readingFrame, showReadingFrame=showReadingFrame)
+            print (readingFrame)
+        clean_dic,quiet_dic, refSeq,mutSeq, origMutSeq, origRevSeq,locations_dic = MainBE(form.upSeq.data,form.downSeq.data,form.mutation.data,form.WT.data,readingFrame)
+    return render_template('input.html', title="input", form=form, RF=readingFrame, result=(clean_dic,quiet_dic,refSeq,mutSeq,origMutSeq, origRevSeq,locations_dic)) # readingFrame=readingFrame, showReadingFrame=showReadingFrame)
 
 
 @app.route('/download2/<filename>', methods=['GET', 'POST'])
@@ -122,6 +125,11 @@ def formTable():
         input3 = request.form.table3
         input4 = request.form.table4
         return render_template('formTable.html', result=(input1,input2,input3,input4))
+
+@app.route('/getTable', methods=['POST', 'GET'])
+def getTable():
+    result=0
+    return render_template('getTable.html',result=result)
 
 if __name__ == '__main__':
     app.run(debug=True)

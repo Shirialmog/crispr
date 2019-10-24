@@ -1,17 +1,23 @@
 {% extends "layout.html" %}
 {% block content %}
+
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <h1>Upload Image</h1>
+                <h1>Upload a File</h1>
                 <br>
 
                 <form method="post" action="" enctype="multipart/form-data">
                     {{ form.hidden_tag() }}
                     <fieldset class="form-group">
-                        <legend class="border-bottom mb-4">Upload File</legend>
+                        <legend class="border-bottom mb-2">Instructions</legend>
                         <div class="form-group">
-                            {{ form.inputFile.label() }}
+                        <p> Here you may upload multiple SNP's as a single CSV file.
+                            The file must be in <a href="/sample">this format</a> <br>
+                        After you press 'Upload', a new CSV file named "full_results.csv" will be downloaded to your computer.
+                        How to read this file: stay tuned
+                        </p>
+{#                            {{ form.inputFile.label() }}#}
                             {{ form.inputFile(class="form-control-file") }}
                             {% if form.inputFile.errors %}
                                 {% for error in form.inputFile.errors %}
@@ -23,9 +29,17 @@
                 <div class="form-group">
                     {{ form.submit(class="btn btn-outline-info") }}
                 </div>
+                {% if showresults %}
+                <div>
+                    <a href="{{ url_for('download2', filename=filename) }}">Download your file {{ filename }}</a>
+                </div>
+                {% endif %}
+
 
                 </form>
+
             </div>
         </div>
     </div>
+
 {% endblock content %}

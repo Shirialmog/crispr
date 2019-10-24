@@ -36,6 +36,7 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0 auto;
     width:32% /* value of your choice which suits your alignment */
 }
+
 .article-title {
   color: #444444;
 }
@@ -85,4 +86,18 @@ a.article-title:hover {
 
 .wrapit {
   word-wrap: break-word;
+}
+
+.pam{
+  color: #6f42c1;
+  font-weight: bold;
+}
+.breakrow{
+  color: black;
+  background: #adadad;
+
+}
+.datarow{
+  color:black;
+  font-weight: normal;
 }

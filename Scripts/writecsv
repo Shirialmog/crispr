@@ -1,0 +1,15 @@
+import csv
+
+with open('MSdata.csv', mode='w') as f:
+    wr = csv.writer(f, quoting=csv.QUOTE_ALL,lineterminator='\n')
+    for i in range(255):
+       wr.writerow(['neg_'+str(i)+'.png',0])
+    for i in range(255):
+        wr.writerow(['pos_' + str(i) + '.png', 1])
+
+with open('MSdata_val.csv', mode='w') as f:
+    wr = csv.writer(f, quoting=csv.QUOTE_ALL,lineterminator='\n')
+    for i in range(256,334):
+       wr.writerow(['neg_'+str(i)+'.png',0])
+    for i in range(256,334):
+        wr.writerow(['pos_' + str(i) + '.png', 1])
