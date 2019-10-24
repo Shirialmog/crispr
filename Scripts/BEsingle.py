@@ -304,6 +304,11 @@ def getRevComp(snp):
 def checkRF(snp):
     #this function will check the other 2 bases in the reading frame to see whether fixing them may result in a quiet result
     if snp.readingFrame==1:
+        zero_seq5 = snp.seq5
+        zero_mutation = snp.mutation
+        zero_wt = snp.wt
+        zero_seq3 = snp.seq3
+        snp0 = BEseqType(12, zero_seq5, zero_seq3, zero_wt, zero_mutation, 1, 1, 1, 1)
         first_seq5=snp.seq5+snp.mutation
         first_mutation=snp.seq3[0]
         first_wt=str(Seq(snp.mutation).reverse_complement())
@@ -314,9 +319,14 @@ def checkRF(snp):
         second_wt = str(Seq(snp.mutation).reverse_complement())
         second_seq3 = snp.seq3[2:]
         snp2 = BEseqType(12, second_seq5, second_seq3, second_wt,second_mutation, 3,1,1,1)
-        return snp1,snp2
+        return snp0, snp1,snp2
 
     elif snp.readingFrame==2:
+        zero_seq5 = snp.seq5
+        zero_mutation = snp.mutation
+        zero_wt = snp.wt
+        zero_seq3 = snp.seq3
+        snp0 = BEseqType(12, zero_seq5, zero_seq3, zero_wt, zero_mutation, 2, 1, 1, 1)
         first_seq5=snp.seq5[:-1]
         first_mutation=snp.seq5[-1]
         first_wt=str(Seq(snp.mutation).reverse_complement())
@@ -327,21 +337,27 @@ def checkRF(snp):
         second_wt = str(Seq(snp.mutation).reverse_complement())
         second_seq3 = snp.seq3[1:]
         snp2 = BEseqType(12, second_seq5, second_seq3, second_wt,second_mutation, 3,1,1,1)
-        return snp1,snp2
+        return snp0,snp1,snp2
 
     # elif snp.readingFrame==3:
     else:
+        print ("else")
+        zero_seq5 = snp.seq5
+        zero_mutation = snp.mutation
+        zero_wt = snp.wt
+        zero_seq3 = snp.seq3
+        snp0 = BEseqType(12, zero_seq5, zero_seq3, zero_wt, zero_mutation, 3, 1, 1, 1)
         first_seq5=snp.seq5[:-2]
         first_mutation=snp.seq5[-2]
         first_wt=str(Seq(snp.mutation).reverse_complement())
         first_seq3=snp.seq5[-1]+snp.mutation+snp.seq3
         snp1=BEseqType(12,first_seq5,first_seq3,first_wt,first_mutation,1,1,1,1)
         second_seq5 = snp.seq5[:-1]
-        second_mutation = snp.seq3[-1]
+        second_mutation = snp.seq5[-1]
         second_wt = str(Seq(snp.mutation).reverse_complement())
         second_seq3 = snp.mutation+snp.seq3
         snp2 = BEseqType(12, second_seq5, second_seq3,second_wt, second_mutation,2,1,1,1)
-        return snp1,snp2
+        return snp0, snp1,snp2
 
 
 def MainBE(upSeq, downSeq, mutation, wt, readingFrame=2):
@@ -373,14 +389,33 @@ def MainBE(upSeq, downSeq, mutation, wt, readingFrame=2):
         snp.wt="T"
         BElist = CBElist
         MinorBElist = CBElistMinor
+    else:
+        BElist=[]
 
-    snp2,snp3=checkRF(snp)
-    print (2,3)
+    snp0,snp2,snp3=checkRF(snp)
+    if snp0.mutation == "C":
+        BElist0 = CBElist
+        print ("snp0")
+    elif snp0.mutation == "A":
+        BElist0 = ABElist
+    elif snp0.mutation == "T":
+        snp0 = getRevComp(snp)
+        rev = True
+        snp0.mutation = "A"
+        snp0.wt = "G"
+        BElist0 = ABElist
+    elif snp0.mutation == "G":
+        snp0 = getRevComp(snp)
+        rev = True
+        snp0.mutation = "C"
+        snp0.wt = "T"
+        BElist0 = CBElist
     if snp2.mutation == "C":
         BElist2 = CBElist
     elif snp2.mutation == "A":
         BElist2 = ABElist
     elif snp2.mutation == "T":
+        print ("snp02")
         snp2 = getRevComp(snp)
         rev = True
         snp2.mutation = "A"
@@ -394,38 +429,70 @@ def MainBE(upSeq, downSeq, mutation, wt, readingFrame=2):
         BElist2 = CBElist
 
     if snp3.mutation == "C":
+
+
         BElist3 = CBElist
     elif snp3.mutation == "A":
+
         BElist3 = ABElist
-    elif snp3.mutation == "T":
+    elif snp3.mutation =="T":
+        print ("snp3")
         snp3 = getRevComp(snp)
         rev = True
         snp3.mutation = "A"
         snp3.wt = "G"
         BElist3 = ABElist
     elif snp3.mutation == "G":
+
         snp3 = getRevComp(snp)
         rev = True
         snp3.mutation = "C"
         snp3.wt = "T"
         BElist3 = CBElist
+
+
+    print ("you suck")
+    check_match = matchBE(snp, BElist)
     try:
-        #check for matches in major window
-        check_match = matchBE(snp, BElist)
+        print ("a")
+        check_match0 = matchBE(snp0, BElist0)
+        print("b")
+    except:
+        check_match0=[]
+        BElist0=[]
+    try:
         check_match2=matchBE(snp2,BElist2)
+        print("c")
+    except:
+        BElist2=[]
+        check_match2=[]
+    try:
         check_match3=matchBE(snp3,BElist3)
-        #check for clean match
-        clean_dic,quiet_dic,origMutSeq, origRevSeq,locations_dic= cleanMatch(snp, check_match, BElist,rev)
-        clean_dic2, quiet_dic2, origMutSeq2, origRevSeq2, locations_dic2 = cleanMatch(snp2, check_match2, BElist, rev)
-        clean_dic3, quiet_dic3, origMutSeq3, origRevSeq3, locations_dic3 = cleanMatch(snp3, check_match3, BElist, rev)
-        for key in quiet_dic2:
-            if key not in quiet_dic:
-                quiet_dic[key]=quiet_dic2[key]
-        for key in quiet_dic3:
-            if key not in quiet_dic:
-                quiet_dic[key]=quiet_dic3[key]
+        print("d")
+    except:
+        BElist3=[]
+        check_match3=[]
+    #check for clean match
+    clean_dic,quiet_dic,origMutSeq, origRevSeq,locations_dic= cleanMatch(snp, check_match, BElist,rev)
+    clean_dic0, quiet_dic0, origMutSeq0, origRevSeq0, locations_dic0 = cleanMatch(snp0, check_match0, BElist0, rev)
+    clean_dic2, quiet_dic2, origMutSeq2, origRevSeq2, locations_dic2 = cleanMatch(snp2, check_match2, BElist2, rev)
+    clean_dic3, quiet_dic3, origMutSeq3, origRevSeq3, locations_dic3 = cleanMatch(snp3, check_match3, BElist3, rev)
+    for key in quiet_dic0:
+        if key not in quiet_dic:
+            quiet_dic[key]=quiet_dic0[key]
+    for key in quiet_dic2:
+        if key not in quiet_dic:
+            quiet_dic[key]=quiet_dic2[key]
+    for key in quiet_dic3:
+        if key not in quiet_dic:
+            quiet_dic[key]=quiet_dic3[key]
+    # except:
+    #     return [],[],[],[],[],[],[]
+    origMutSeq=[]
+    origRevSeq=[]
+    try:
+        return clean_dic, quiet_dic,refSeq,mutSeq, origMutSeq, origRevSeq,locations_dic
     except:
         return [],[],[],[],[],[],[]
-    return clean_dic, quiet_dic,refSeq,mutSeq, origMutSeq, origRevSeq,locations_dic
 
 
