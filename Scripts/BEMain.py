@@ -2,6 +2,7 @@ from Scripts.BEseqType import *
 from Bio.Seq import Seq
 import csv
 from Scripts.baseEditorsTable import CBElist, CBElistMinor, ABElist, ABElistMinor, BEletter
+from Scripts.transverse import SpecialCleanMatch,origPro
 
 def importSNPS(SNPfile):
     rslts=[]
@@ -14,12 +15,14 @@ def importSNPS(SNPfile):
 
         for row in csv_read:
             snpID=row[0]
-            find_mut_len=len(row[9])
+            if len(row[9])>3:
+                continue
+
             """
             the sequence is given as a string, with 25 bases before mutation and 25 after. 
             need to find length of mutation to splice properly
             """
-            mut_len=(find_mut_len-1)/2
+
             mutation=row[9][2]
             wt=row[9][0]
             sequence5 = row[7][0:25]
@@ -134,7 +137,7 @@ def cleanMatch(snp, Matches, BElist,rev):
                     diff = 2
                 elif len(snp.seq5) % 3 == 2:
                     totalSeq1 = totalSeq1[1:]
-                    totalSeq2 = totalSeq1[2:]
+                    totalSeq2 = totalSeq1[1:]
                     printSeq5 = printSeq5[1:]
                     diff = 1
             elif snp.readingFrame == "3":
@@ -160,7 +163,7 @@ def cleanMatch(snp, Matches, BElist,rev):
                 protein_seq = Seq(totalSeq2).translate()
             else:
                 protein_seq = Seq(totalSeq2).reverse_complement().translate()
-
+            origProtein=protein_seq
             #clean_list = []
             #quiet_list = []
             max_num = 0
@@ -211,7 +214,7 @@ def cleanMatch(snp, Matches, BElist,rev):
                     quiet_list.append(BE)
         cleanMatches[snp.snpID]=clean_list
         quietDic[snp.snpID]=quiet_list
-    return cleanMatches, quietDic
+    return cleanMatches, quietDic,origProtein
 
 def isStopCodon (seq5, x, seq3, readingFrame):
     #take one reading frame containing the mutation
@@ -228,71 +231,100 @@ def isStopCodon (seq5, x, seq3, readingFrame):
 
 
 def getRevComp(snp):
-    len5=len(snp.seq5)
+    len3=len(snp.seq3)
     totalSeq= snp.seq5+snp.mutation+snp.seq3
     total_seq=Seq(totalSeq)
     rc_seq=total_seq.reverse_complement()
-    seq5=str(rc_seq[0:len5])
-    seq3=str(rc_seq[len5+1:])
+    seq5=str(rc_seq[0:len3])
+    seq3=str(rc_seq[len3+1:])
     new_snp=BEseqType(snp.snpID,seq5 ,seq3,snp.mutation,snp.wt, snp.readingFrame, snp.aaPosition,snp.geneName,snp.geneID)
     return new_snp
 
 def checkRF(snp):
     #this function will check the other 2 bases in the reading frame to see whether fixing them may result in a quiet result
-    if snp.readingFrame==1:
+    if snp.readingFrame=="1":
+        zero_seq5 = snp.seq5
+        zero_mutation = snp.mutation
+        zero_wt = find_cor(zero_mutation)
+        zero_seq3 = snp.seq3
+        snp0 = BEseqType(snp.snpID, zero_seq5, zero_seq3, zero_wt, zero_mutation, 1, 1, 1, 1)
         first_seq5=snp.seq5+snp.mutation
         first_mutation=snp.seq3[0]
-        first_wt=str(Seq(snp.mutation).reverse_complement())
+        first_wt=find_cor(first_mutation)
         first_seq3=snp.seq3[1:]
-        snp1=BEseqType(12,first_seq5,first_seq3,first_wt,first_mutation,2,1,1,1)
+        snp1=BEseqType(snp.snpID,first_seq5,first_seq3,first_wt,first_mutation,2,1,1,1)
         second_seq5 = snp.seq5 + snp.mutation+snp.seq3[0]
         second_mutation = snp.seq3[1]
-        second_wt = str(Seq(snp.mutation).reverse_complement())
+        second_wt = find_cor(second_mutation)
         second_seq3 = snp.seq3[2:]
-        snp2 = BEseqType(12, second_seq5, second_seq3, second_wt,second_mutation, 3,1,1,1)
-        return snp1,snp2
+        snp2 = BEseqType(snp.snpID, second_seq5, second_seq3, second_wt,second_mutation, 3,1,1,1)
+        return snp0, snp1,snp2
 
-    elif snp.readingFrame==2:
+    elif snp.readingFrame=="2":
+        zero_seq5 = snp.seq5
+        zero_mutation = snp.mutation
+        zero_wt = find_cor(zero_mutation)
+        zero_seq3 = snp.seq3
+        snp0 = BEseqType(snp.snpID, zero_seq5, zero_seq3, zero_wt, zero_mutation, 2, 1, 1, 1)
         first_seq5=snp.seq5[:-1]
         first_mutation=snp.seq5[-1]
-        first_wt=str(Seq(snp.mutation).reverse_complement())
+        first_wt=find_cor(first_mutation)
         first_seq3=snp.mutation+snp.seq3
-        snp1=BEseqType(12,first_seq5,first_seq3,first_wt,first_mutation,1,1,1,1)
+        snp1=BEseqType(snp.snpID,first_seq5,first_seq3,first_wt,first_mutation,1,1,1,1)
         second_seq5 = snp.seq5 + snp.mutation
         second_mutation = snp.seq3[0]
-        second_wt = str(Seq(snp.mutation).reverse_complement())
+        second_wt = find_cor(second_mutation)
         second_seq3 = snp.seq3[1:]
-        snp2 = BEseqType(12, second_seq5, second_seq3, second_wt,second_mutation, 3,1,1,1)
-        return snp1,snp2
+        snp2 = BEseqType(snp.snpID, second_seq5, second_seq3, second_wt,second_mutation, 3,1,1,1)
+        return snp0,snp1,snp2
 
     # elif snp.readingFrame==3:
     else:
+        zero_seq5 = snp.seq5
+        zero_mutation = snp.mutation
+        zero_wt = find_cor(zero_mutation)
+        zero_seq3 = snp.seq3
+        snp0 = BEseqType(snp.snpID, zero_seq5, zero_seq3, zero_wt, zero_mutation, 3, 1, 1, 1)
         first_seq5=snp.seq5[:-2]
         first_mutation=snp.seq5[-2]
-        first_wt=str(Seq(snp.mutation).reverse_complement())
+        first_wt=find_cor(first_mutation)
         first_seq3=snp.seq5[-1]+snp.mutation+snp.seq3
-        snp1=BEseqType(12,first_seq5,first_seq3,first_wt,first_mutation,1,1,1,1)
+        snp1=BEseqType(snp.snpID,first_seq5,first_seq3,first_wt,first_mutation,1,1,1,1)
         second_seq5 = snp.seq5[:-1]
-        second_mutation = snp.seq3[-1]
-        second_wt = str(Seq(snp.mutation).reverse_complement())
+        second_mutation = snp.seq5[-1]
+        second_wt = find_cor(second_mutation)
         second_seq3 = snp.mutation+snp.seq3
-        snp2 = BEseqType(12, second_seq5, second_seq3,second_wt, second_mutation,2,1,1,1)
-        return snp1,snp2
+        snp2 = BEseqType(snp.snpID, second_seq5, second_seq3,second_wt, second_mutation,2,1,1,1)
+        return snp0, snp1,snp2
+
+def find_cor(base):
+    if base=="C":
+        return "T"
+    if base=="T":
+        return "C"
+    if base=="A":
+        return "G"
+    if base=="G":
+        return "A"
 
 def Main(DB):
     SNPS,rsltsDic=importSNPS(DB) #parsing cvs file
     matches={}
-    matches2 = {}
-    matches3 = {}
+    matches0,matches2,matches3={},{},{}
     matchesMinor={}
     cleanMatchdic = {}
     quietMatchdic={}
     rev = False
+    g=1
     # sort DNA. First, determine which bases we wish to replace. 4 cases:
     # 1. C to T: use CBE list       2. A to G: use ABE list
     # 3. T to C: switch to reverse complement and use ABE
     # 4. G to A: switch to RC and use CBE
     for snp in SNPS:
+        tmp=snp
+        clean=[]
+        quiet=[]
+        clean0,quiet0,clean2,quiet2,clean3,quiet3=[],[],[],[],[],[]
         rev = False
         if snp.mutation == "C" and snp.wt == "T":
             BElist = CBElist
@@ -320,72 +352,164 @@ def Main(DB):
 
 
         try:
-
           # check for matches in major window
             check_match = matchBE(snp, BElist)
             matches.update(check_match)
-            try:
-                snp2, snp3 = checkRF(snp)
-                check_match2 = matchBE(snp2, BElist)
-                matches2.update(check_match2)
-                check_match3 = matchBE(snp3, BElist)
-                matches3.update(check_match3)
-            except:
-                g=1
+        except:
+            pass
+        try:
+            snp0, snp2, snp3 = checkRF(tmp)
+            print (snp.snpID,snp0.readingFrame,snp2.readingFrame,snp3.readingFrame)
+            rev0,rev2,rev3=False,False,False
+            if snp0.mutation == "C":
+                BElist0 = CBElist
+            elif snp0.mutation == "A":
+                BElist0 = ABElist
+            elif snp0.mutation == "T":
+                #snp0 = getRevComp(snp0)
+                rev0 = True
+                snp0.mutation = "A"
+                snp0.wt = "G"
+                BElist0 = ABElist
+            elif snp0.mutation == "G":
+                #snp0 = getRevComp(snp0)
+                rev0 = True
+                snp0.mutation = "C"
+                snp0.wt = "T"
+                BElist0 = CBElist
+            if snp2.mutation == "C":
+                BElist2 = CBElist
+            elif snp2.mutation == "A":
+                BElist2 = ABElist
+            elif snp2.mutation == "T":
+                #snp2 = getRevComp(snp2)
 
+                rev2 = True
+                snp2.mutation = "A"
+                snp2.wt = "G"
+                BElist2 = ABElist
+            elif snp2.mutation == "G":
+                #snp2 = getRevComp(snp2)
+                rev2 = True
+                snp2.mutation = "C"
+                snp2.wt = "T"
+                BElist2 = CBElist
+
+            if snp3.mutation == "C":
+                BElist3 = CBElist
+            elif snp3.mutation == "A":
+                BElist3 = ABElist
+            elif snp3.mutation == "T":
+                #snp3 = getRevComp(snp3)
+                rev3 = True
+                snp3.mutation = "A"
+                snp3.wt = "G"
+                BElist3 = ABElist
+            elif snp3.mutation == "G":
+                #snp3 = getRevComp(snp3)
+                rev3 = True
+                snp3.mutation = "C"
+                snp3.wt = "T"
+                BElist3 = CBElist
+        except:
+            pass
+        try:
+            check_match0 = matchBE(snp0, BElist0)
+            matches.update(check_match0)
+        except:
+            pass
+        try:
+            check_match2 = matchBE(snp2, BElist2)
+            matches.update(check_match2)
+        except:
+            pass
+        try:
+            check_match3 = matchBE(snp3, BElist3)
+            matches.update(check_match3)
+        except:
+            pass
 
             #check for matches in minor window
-            check_match_minor = matchBE(snp, MinorBElist)
-            matchesMinor.update(check_match_minor)
+            #check_match_minor = matchBE(snp, MinorBElist)
+            #matchesMinor.update(check_match_minor)
 
-            #check for clean match
-            clean, quiet= cleanMatch(snp,check_match,BElist,rev)
-            try:
-                clean2, quiet2 = cleanMatch(snp2, check_match2, BElist)
-                clean3, quiet3 = cleanMatch(snp3, check_match3, BElist)
-                for key in quiet2:
-                    if key not in quiet:
-                        quiet[key] = quiet2[key]
-                for key in quiet3:
-                    if key not in quiet:
-                        quiet[key] = quiet3[key]
-            except:
-                g=1
-            cleanMatchdic.update(clean)
-            quietMatchdic.update(quiet)
+        #check for clean match
+        try:
+            clean, quiet,orig_protein= cleanMatch(snp,check_match,BElist,rev)
 
         except:
-            g=1
+            clean={}
+            quiet={}
+            orig_protein=origPro(snp,rev)
+        try:
+            clean0,quiet0=SpecialCleanMatch(snp0,check_match0,BElist0,rev0,orig_protein)
+            print(snp.snpID, 2, clean0, quiet0)
+        except:
+            quiet0=[]
+        try:
+            clean2, quiet2 = SpecialCleanMatch(snp2, check_match2, BElist2,rev2,orig_protein)
+        except:
+            quiet2 = []
+        try:
+            clean3, quiet3 = SpecialCleanMatch(snp3, check_match3, BElist3,rev3,orig_protein)
+        except:
+            quiet3 = []
+
+        for key in quiet0:
+            if snp.snpID not in quiet:
+                quiet[snp.snpID]=[key]
+            elif key not in quiet[snp.snpID]:
+                quiet[snp.snpID].append(key)
+        for key in quiet2:
+            if snp.snpID not in quiet:
+                quiet[snp.snpID]=[key]
+            elif key not in quiet[snp.snpID]:
+                quiet[snp.snpID].append(key)
+        for key in quiet3:
+            if snp.snpID not in quiet:
+                quiet[snp.snpID]=[key]
+            elif key not in quiet[snp.snpID]:
+                quiet[snp.snpID].append(key)
+        try:
+            quietMatchdic.update(quiet)
+            cleanMatchdic.update(clean)
+
+        except:
+            pass
+
             #print ("Error: %s is not an appropriate snp" %snp.snpID)
 
         #if isStopCodon(snp.seq5, snp.mutation, snp.seq3, snp.readingFrame)==True:
             #print ("mutation in snp %s resulted in a stop codon " % snp.snpID)
         #if isStopCodon(snp.seq5, snp.wt, snp.seq3, snp.readingFrame)==True:
             #print ("wt of snp %s results in a stop codon " % snp.snpID)
+
     empty_keys = [k for k, v in matches.items() if v == []]
-    print("matches:", 27257 - (len(empty_keys)))
+    print("matches:", 43926 - (len(empty_keys)))
     empty_keys = [k for k, v in cleanMatchdic.items() if v == []]
-    print ("clean:", 27257-(len(empty_keys)))
+    print ("clean:", 22579-(len(empty_keys)))
     empty_keys = [k for k, v in quietMatchdic.items() if v == []]
-    print("quiet:", 27257 - (len(empty_keys)))
+    print("quiet:", 22673 - (len(empty_keys)))
     return matches, cleanMatchdic, quietMatchdic, rsltsDic
 
 
-matches, cleanMatchdic, quietMatchdic ,rsltsDic=Main("snps_with_clinvar.csv")
+matches, cleanMatchdic, quietMatchdic ,rsltsDic=Main("check.csv")
 with open('matches_file.csv', mode='w') as f:
     f.write('snpID, matches\n')
     for key in matches.keys():
         f.write("%s,%s\n" % (key, matches[key]))
 with open('cleanMatches_file.csv', mode='w') as f:
     f.write('snpID, matches\n')
+    f.write(str(len(cleanMatchdic)))
     for key in cleanMatchdic.keys():
         f.write("%s,%s\n" % (key, cleanMatchdic[key]))
 with open('quietMatches_file.csv', mode='w') as f:
     f.write('snpID, matches\n')
+    f.write(str(len(quietMatchdic)))
     for key in quietMatchdic.keys():
         f.write("%s,%s\n" % (key, quietMatchdic[key]))
 
-with open('snps_with_clinvar.csv',mode='r') as file:
+with open('check.csv',mode='r') as file:
     file_read = csv.reader(file, delimiter=",")
     total_table={}
     for row in file_read:
@@ -421,10 +545,12 @@ with open('full_results.csv', mode='w') as f:
         mlist=[]
         for BE in beList:
             temp=0
-            if BE in quietMatchdic[key]:
-                temp="Quiet"
-            if BE in cleanMatchdic[key]:
-                temp="Clean"
+            if key in quietMatchdic:
+                if BE in quietMatchdic[key]:
+                    temp="Quiet"
+            if key in cleanMatchdic:
+                if BE in cleanMatchdic[key]:
+                    temp="Clean"
 
             mlist.append(temp)
         if mlist!=[0]*34:
