@@ -7,9 +7,9 @@ with open('MSdata.csv', mode='w') as f:
     for i in range(255):
         wr.writerow(['pos_' + str(i) + '.png', 1])
 
-with open('MSdata_val.csv', mode='w') as f:
+with open('MSdata_test.csv', mode='w') as f:
     wr = csv.writer(f, quoting=csv.QUOTE_ALL,lineterminator='\n')
-    for i in range(256,334):
+    for i in range(334,384):
        wr.writerow(['neg_'+str(i)+'.png',0])
-    for i in range(256,334):
+    for i in range(334,384):
         wr.writerow(['pos_' + str(i) + '.png', 1])
