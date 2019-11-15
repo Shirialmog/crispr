@@ -122,7 +122,7 @@ def cleanMatch(snp, Matches, BElist,rev):
                 if len(snp.seq5) % 3 == 1:
                     totalSeq1 = totalSeq1[1:]
                     totalSeq2 = totalSeq2[1:]
-                    printSeq5 = printSeq5[1:]kk
+                    printSeq5 = printSeq5[1:]
                     diff = 1
                 elif len(snp.seq5) % 3 == 2:
                     totalSeq1 = totalSeq1[2:]
