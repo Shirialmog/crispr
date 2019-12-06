@@ -72,9 +72,10 @@ def matchBE(snp, BElist):
                     if j == len(PAM):
                         match = True
                         break
-            if match is True:
+            if match is True and BE!= "eA3A-BE3":
                 matches_list.append(BE)
-
+            elif match is True and snp.seq5[-1]=='T':
+                matches_list.append(BE)
         matches[snp.snpID] = matches_list
     return matches
 
@@ -93,10 +94,23 @@ def cleanMatch(snp, Matches, BElist,rev):
                 seq3 = snp.seq5[::-1]  # get reverse
                 seq5 = snp.seq3[::-1]  # get reverse
 
+            totalSeq1 = seq5 + snp.mutation + seq3
+            totalSeq2 = seq5 + snp.wt + seq3
+            printSeq5 = seq5  # for results
+            printSeq3 = seq3  # for results
+            diff = 0
+
+            if rev == False:
+                protein_seq = Seq(totalSeq2).translate()
+            else:
+                protein_seq = Seq(totalSeq2).reverse_complement().translate()
+            origProtein = protein_seq
+
             PAM=BElist[BE][0]
             start=BElist[BE][1]-1
             end=BElist[BE][2]-1
-            locations=[]  #find locations of PAM. for each location, check if clean
+            locations=[]
+            #find locations of PAM. for each location, check if clean
             window = (end - start+1)
             for i in range(window):
                 temp = start+i
@@ -113,66 +127,8 @@ def cleanMatch(snp, Matches, BElist,rev):
                         break
             locations_dic[BE] = locations
 
-            totalSeq1 = seq5 + snp.mutation + seq3
-            totalSeq2 = seq5 + snp.wt + seq3
-            printSeq5 = seq5  # for results
-            printSeq3 = seq3  # for results
-            diff = 0
-            if snp.readingFrame == "1":
-                if len(snp.seq5) % 3 == 1:
-                    totalSeq1 = totalSeq1[1:]
-                    totalSeq2 = totalSeq2[1:]
-                    printSeq5 = printSeq5[1:]
-                    diff = 1
-                elif len(snp.seq5) % 3 == 2:
-                    totalSeq1 = totalSeq1[2:]
-                    totalSeq2 = totalSeq2[2:]
-                    printSeq5 = printSeq5[2:]
-                    diff = 2
-            elif snp.readingFrame == "2":
-                if len(snp.seq5) % 3 == 0:
-                    totalSeq1 = totalSeq1[2:]
-                    totalSeq2 = totalSeq2[2:]
-                    printSeq5 = printSeq5[2:]
-                    diff = 2
-                elif len(snp.seq5) % 3 == 2:
-                    totalSeq1 = totalSeq1[1:]
-                    totalSeq2 = totalSeq1[1:]
-                    printSeq5 = printSeq5[1:]
-                    diff = 1
-            elif snp.readingFrame == "3":
-                if len(snp.seq5) % 3 == 0:
-                    totalSeq1 = totalSeq1[1:]
-                    totalSeq2 = totalSeq2[1:]
-                    printSeq5 = printSeq5[1:]
-                    diff = 1
-                elif len(snp.seq5) % 3 == 1:
-                    totalSeq1 = totalSeq1[2:]
-                    totalSeq2 = totalSeq2[2:]
-                    printSeq5 = printSeq5[2:]
-                    diff = 2
-            if len(totalSeq1) % 3 == 1:
-                totalSeq1 = totalSeq1[:-1]
-                totalSeq2 = totalSeq2[:-1]
-                printSeq3 = printSeq3[:-1]
-            if len(totalSeq1) % 3 == 2:
-                totalSeq1 = totalSeq1[:-2]
-                totalSeq2 = totalSeq2[:-2]
-                printSeq3 = printSeq3[:-2]
-            if rev==False:
-                protein_seq = Seq(totalSeq2).translate()
-            else:
-                protein_seq = Seq(totalSeq2).reverse_complement().translate()
-            origProtein=protein_seq
-            #clean_list = []
-            #quiet_list = []
-            max_num = 0
-            protein_match = False
             for loc in locations_dic[BE]:
                 protein_match = False
-                temp_seq=totalSeq1
-                # loc=loc+len(snp.seq5)
-                # activation_window = totalSeq1[loc-end-diff:loc-start]
                 locFromEnd = len(printSeq3) - loc
                 loc = loc + len(printSeq5)
                 activation_window = totalSeq1[len(printSeq3) - locFromEnd + len(printSeq5) - end:len(
@@ -203,7 +159,6 @@ def cleanMatch(snp, Matches, BElist,rev):
                     endP = Seq(
                         totalSeq1[len(printSeq3) - locFromEnd + len(printSeq5) - start + 1:]).reverse_complement()
                     finalSeq = endP + new_AW + beginningP
-
                 protein_seq_new = finalSeq.translate()
                 if max_num==1:
                     clean_list.append(BE)
@@ -216,18 +171,74 @@ def cleanMatch(snp, Matches, BElist,rev):
         quietDic[snp.snpID]=quiet_list
     return cleanMatches, quietDic,origProtein
 
-def isStopCodon (seq5, x, seq3, readingFrame):
-    #take one reading frame containing the mutation
-    totalSequence=seq5+x+seq3
-    start=len(seq5)
-    if readingFrame=="1":
-        codon=totalSequence[start:start+3]
-    elif readingFrame=="2":
-        codon=totalSequence[start-1:start+2]
-    else:
-        codon=totalSequence[start-2:start+1]
-    if codon== "TAG" or codon== "TAA" or codon== "TGA":
-        return True
+def beginningCut(snp):
+    if snp.readingFrame == "1":
+        if len(snp.seq5) % 3 == 1:
+            snp.seq5 = snp.seq5[1:]
+        elif len(snp.seq5) % 3 == 2:
+            snp.seq5 = snp.seq5[2:]
+    elif snp.readingFrame == "2":
+        if len(snp.seq5) % 3 == 0:
+            snp.seq5 = snp.seq5[2:]
+        elif len(snp.seq5) % 3 == 2:
+            snp.seq5 = snp.seq5[1:]
+    elif snp.readingFrame == "3":
+        if len(snp.seq5) % 3 == 0:
+            snp.seq5 = snp.seq5[1:]
+        elif len(snp.seq5) % 3 == 1:
+            snp.seq5 = snp.seq5[2:]
+
+    if (len(snp.seq5)+len(snp.seq3)+1) % 3 == 1:
+        snp.seq3 = snp.seq3[:-1]
+    if (len(snp.seq5)+len(snp.seq3)+1) % 3 == 2:
+        snp.seq3 = snp.seq3[:-2]
+
+    return snp
+
+def cutFromRF(snp,totalSeq1,totalSeq2,printSeq5,printSeq3):
+    if snp.readingFrame == "1":
+        if len(snp.seq5) % 3 == 1:
+            totalSeq1 = totalSeq1[1:]
+            totalSeq2 = totalSeq2[1:]
+            printSeq5 = printSeq5[1:]
+            diff = 1
+        elif len(snp.seq5) % 3 == 2:
+            totalSeq1 = totalSeq1[2:]
+            totalSeq2 = totalSeq2[2:]
+            printSeq5 = printSeq5[2:]
+            diff = 2
+    elif snp.readingFrame == "2":
+        if len(snp.seq5) % 3 == 0:
+            totalSeq1 = totalSeq1[2:]
+            totalSeq2 = totalSeq2[2:]
+            printSeq5 = printSeq5[2:]
+            diff = 2
+        elif len(snp.seq5) % 3 == 2:
+            totalSeq1 = totalSeq1[1:]
+            totalSeq2 = totalSeq1[1:]
+            printSeq5 = printSeq5[1:]
+            diff = 1
+    elif snp.readingFrame == "3":
+        if len(snp.seq5) % 3 == 0:
+            totalSeq1 = totalSeq1[1:]
+            totalSeq2 = totalSeq2[1:]
+            printSeq5 = printSeq5[1:]
+            diff = 1
+        elif len(snp.seq5) % 3 == 1:
+            totalSeq1 = totalSeq1[2:]
+            totalSeq2 = totalSeq2[2:]
+            printSeq5 = printSeq5[2:]
+            diff = 2
+    if len(totalSeq1) % 3 == 1:
+        totalSeq1 = totalSeq1[:-1]
+        totalSeq2 = totalSeq2[:-1]
+        printSeq3 = printSeq3[:-1]
+    if len(totalSeq1) % 3 == 2:
+        totalSeq1 = totalSeq1[:-2]
+        totalSeq2 = totalSeq2[:-2]
+        printSeq3 = printSeq3[:-2]
+    return totalSeq1,totalSeq2,printSeq5,printSeq3
+
 
 
 def getRevComp(snp):
@@ -314,18 +325,16 @@ def Main(DB):
     matchesMinor={}
     cleanMatchdic = {}
     quietMatchdic={}
-    rev = False
-    g=1
     # sort DNA. First, determine which bases we wish to replace. 4 cases:
     # 1. C to T: use CBE list       2. A to G: use ABE list
     # 3. T to C: switch to reverse complement and use ABE
     # 4. G to A: switch to RC and use CBE
     for snp in SNPS:
-        tmp=snp
         clean=[]
         quiet=[]
         clean0,quiet0,clean2,quiet2,clean3,quiet3=[],[],[],[],[],[]
         rev = False
+        snp = beginningCut(snp)
         if snp.mutation == "C" and snp.wt == "T":
             BElist = CBElist
             MinorBElist=CBElistMinor
@@ -358,21 +367,20 @@ def Main(DB):
         except:
             pass
         try:
-            snp0, snp2, snp3 = checkRF(tmp)
-            print (snp.snpID,snp0.readingFrame,snp2.readingFrame,snp3.readingFrame)
+            snp0, snp2, snp3 = checkRF(snp)
             rev0,rev2,rev3=False,False,False
             if snp0.mutation == "C":
                 BElist0 = CBElist
             elif snp0.mutation == "A":
                 BElist0 = ABElist
             elif snp0.mutation == "T":
-                #snp0 = getRevComp(snp0)
+                snp0 = getRevComp(snp0)
                 rev0 = True
                 snp0.mutation = "A"
                 snp0.wt = "G"
                 BElist0 = ABElist
             elif snp0.mutation == "G":
-                #snp0 = getRevComp(snp0)
+                snp0 = getRevComp(snp0)
                 rev0 = True
                 snp0.mutation = "C"
                 snp0.wt = "T"
@@ -382,14 +390,13 @@ def Main(DB):
             elif snp2.mutation == "A":
                 BElist2 = ABElist
             elif snp2.mutation == "T":
-                #snp2 = getRevComp(snp2)
-
+                snp2 = getRevComp(snp2)
                 rev2 = True
                 snp2.mutation = "A"
                 snp2.wt = "G"
                 BElist2 = ABElist
             elif snp2.mutation == "G":
-                #snp2 = getRevComp(snp2)
+                snp2 = getRevComp(snp2)
                 rev2 = True
                 snp2.mutation = "C"
                 snp2.wt = "T"
@@ -400,13 +407,13 @@ def Main(DB):
             elif snp3.mutation == "A":
                 BElist3 = ABElist
             elif snp3.mutation == "T":
-                #snp3 = getRevComp(snp3)
+                snp3 = getRevComp(snp3)
                 rev3 = True
                 snp3.mutation = "A"
                 snp3.wt = "G"
                 BElist3 = ABElist
             elif snp3.mutation == "G":
-                #snp3 = getRevComp(snp3)
+                snp3 = getRevComp(snp3)
                 rev3 = True
                 snp3.mutation = "C"
                 snp3.wt = "T"
@@ -442,8 +449,9 @@ def Main(DB):
             quiet={}
             orig_protein=origPro(snp,rev)
         try:
+
             clean0,quiet0=SpecialCleanMatch(snp0,check_match0,BElist0,rev0,orig_protein)
-            print(snp.snpID, 2, clean0, quiet0)
+
         except:
             quiet0=[]
         try:
@@ -476,14 +484,7 @@ def Main(DB):
 
         except:
             pass
-
-            #print ("Error: %s is not an appropriate snp" %snp.snpID)
-
-        #if isStopCodon(snp.seq5, snp.mutation, snp.seq3, snp.readingFrame)==True:
-            #print ("mutation in snp %s resulted in a stop codon " % snp.snpID)
-        #if isStopCodon(snp.seq5, snp.wt, snp.seq3, snp.readingFrame)==True:
-            #print ("wt of snp %s results in a stop codon " % snp.snpID)
-
+## statistics ##
     empty_keys = [k for k, v in matches.items() if v == []]
     print("matches:", 43926 - (len(empty_keys)))
     empty_keys = [k for k, v in cleanMatchdic.items() if v == []]
@@ -493,7 +494,7 @@ def Main(DB):
     return matches, cleanMatchdic, quietMatchdic, rsltsDic
 
 
-matches, cleanMatchdic, quietMatchdic ,rsltsDic=Main("check.csv")
+matches, cleanMatchdic, quietMatchdic ,rsltsDic=Main("snps_with_clinvar2.csv")
 with open('matches_file.csv', mode='w') as f:
     f.write('snpID, matches\n')
     for key in matches.keys():
@@ -509,7 +510,7 @@ with open('quietMatches_file.csv', mode='w') as f:
     for key in quietMatchdic.keys():
         f.write("%s,%s\n" % (key, quietMatchdic[key]))
 
-with open('check.csv',mode='r') as file:
+with open('snps_with_clinvar2.csv',mode='r') as file:
     file_read = csv.reader(file, delimiter=",")
     total_table={}
     for row in file_read:
@@ -541,7 +542,6 @@ with open('full_results.csv', mode='w') as f:
     keyList=matches.keys()
     beList=["BE1", "BE2", "BE3", "HF-BE3", "BE4(max)", "BE4-Gam","YE1-BE3","YEE-BE3", "VQR-BE3","VRER-BE3","SaBE3", "SaBE4", "SaBE4-Gam", "Sa(KKH)-BE3","Cas12a-BE","Target-AID","Target-AID-NG","xBE3","eA3A-BE3","BE-PLUS","CP-CBEmax variants","evoAPOBEC1-BE4max", "evoFERNY-BE4max","evoCDA1-BE4max", "ABE 7.9","ABE 7.10","ABE 7.10*","xABE","NG-ABEmax" ,"ABESa","VQR-ABE","VRER-ABE","Sa(KKH)-ABE","CP-ABEmax variants"]
     for key in keyList:
-        print (key)
         mlist=[]
         for BE in beList:
             temp=0

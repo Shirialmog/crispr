@@ -2,6 +2,7 @@
 from Scripts.BEseqType import *
 from Bio.Seq import Seq
 from Scripts.baseEditorsTable import CBElist, CBElistMinor, ABElist, ABElistMinor, BEletter
+#from Scripts.BEMain import cutFromRF,getRevComp
 
 def printPamSeq(seq5,activationWindow,seq3, locfromEnd,PAM):
     len3=len(seq3)
@@ -23,6 +24,12 @@ def SpecialCleanMatch(snp, Matches, BElist,rev,originalProtein):
             else:
                 seq3 = snp.seq5[::-1]  # get reverse
                 seq5 = snp.seq3[::-1]  # get reverse
+            totalSeq1 = seq5 + snp.mutation + seq3
+            totalSeq2 = seq5 + snp.wt + seq3
+            printSeq5 = seq5  # for results
+            printSeq3 = seq3  # for results
+            diff = 0
+
 
             PAM=BElist[BE][0]
             start=BElist[BE][1]-1
@@ -49,50 +56,50 @@ def SpecialCleanMatch(snp, Matches, BElist,rev,originalProtein):
             printSeq5 = seq5  # for results
             printSeq3 = seq3  # for results
             diff = 0
-            if snp.readingFrame == 1:
-                print(snp.snpID, "reading frame is 1")
-                if len(snp.seq5) % 3 == 1:
-                    print ("take 1")
-                    totalSeq1 = totalSeq1[1:]
-                    totalSeq2 = totalSeq2[1:]
-                    printSeq5 = printSeq5[1:]
-                    print ("totalseq", totalSeq1)
-                    diff = 1
-                elif len(snp.seq5) % 3 == 2:
-                    totalSeq1 = totalSeq1[2:]
-                    totalSeq2 = totalSeq2[2:]
-                    printSeq5 = printSeq5[2:]
-                    diff = 2
-            elif snp.readingFrame == 2:
-                if len(snp.seq5) % 3 == 0:
-                    totalSeq1 = totalSeq1[2:]
-                    totalSeq2 = totalSeq2[2:]
-                    printSeq5 = printSeq5[2:]
-                    diff = 2
-                elif len(snp.seq5) % 3 == 2:
-                    totalSeq1 = totalSeq1[1:]
-                    totalSeq2 = totalSeq1[1:]
-                    printSeq5 = printSeq5[1:]
-                    diff = 1
-            elif snp.readingFrame == 3:
-                if len(snp.seq5) % 3 == 0:
-                    totalSeq1 = totalSeq1[1:]
-                    totalSeq2 = totalSeq2[1:]
-                    printSeq5 = printSeq5[1:]
-                    diff = 1
-                elif len(snp.seq5) % 3 == 1:
-                    totalSeq1 = totalSeq1[2:]
-                    totalSeq2 = totalSeq2[2:]
-                    printSeq5 = printSeq5[2:]
-                    diff = 2
-            if len(totalSeq1) % 3 == 1:
-                totalSeq1 = totalSeq1[:-1]
-                totalSeq2 = totalSeq2[:-1]
-                printSeq3 = printSeq3[:-1]
-            if len(totalSeq1) % 3 == 2:
-                totalSeq1 = totalSeq1[:-2]
-                totalSeq2 = totalSeq2[:-2]
-                printSeq3 = printSeq3[:-2]
+            # if snp.readingFrame == 1:
+            #     print(snp.snpID, "reading frame is 1")
+            #     if len(snp.seq5) % 3 == 1:
+            #         print ("take 1")
+            #         totalSeq1 = totalSeq1[1:]
+            #         totalSeq2 = totalSeq2[1:]
+            #         printSeq5 = printSeq5[1:]
+            #         print ("totalseq", totalSeq1)
+            #         diff = 1
+            #     elif len(snp.seq5) % 3 == 2:
+            #         totalSeq1 = totalSeq1[2:]
+            #         totalSeq2 = totalSeq2[2:]
+            #         printSeq5 = printSeq5[2:]
+            #         diff = 2
+            # elif snp.readingFrame == 2:
+            #     if len(snp.seq5) % 3 == 0:
+            #         totalSeq1 = totalSeq1[2:]
+            #         totalSeq2 = totalSeq2[2:]
+            #         printSeq5 = printSeq5[2:]
+            #         diff = 2
+            #     elif len(snp.seq5) % 3 == 2:
+            #         totalSeq1 = totalSeq1[1:]
+            #         totalSeq2 = totalSeq1[1:]
+            #         printSeq5 = printSeq5[1:]
+            #         diff = 1
+            # elif snp.readingFrame == 3:
+            #     if len(snp.seq5) % 3 == 0:
+            #         totalSeq1 = totalSeq1[1:]
+            #         totalSeq2 = totalSeq2[1:]
+            #         printSeq5 = printSeq5[1:]
+            #         diff = 1
+            #     elif len(snp.seq5) % 3 == 1:
+            #         totalSeq1 = totalSeq1[2:]
+            #         totalSeq2 = totalSeq2[2:]
+            #         printSeq5 = printSeq5[2:]
+            #         diff = 2
+            # if len(totalSeq1) % 3 == 1:
+            #     totalSeq1 = totalSeq1[:-1]
+            #     totalSeq2 = totalSeq2[:-1]
+            #     printSeq3 = printSeq3[:-1]
+            # if len(totalSeq1) % 3 == 2:
+            #     totalSeq1 = totalSeq1[:-2]
+            #     totalSeq2 = totalSeq2[:-2]
+            #     printSeq3 = printSeq3[:-2]
             if rev==False:
                 protein_seq = Seq(totalSeq2).translate()
             else:
@@ -143,10 +150,6 @@ def SpecialCleanMatch(snp, Matches, BElist,rev,originalProtein):
                 #     protein_seq_new = finalSeq.translate()
                 # if snp.readingFrame=="3":
                 protein_seq_new = finalSeq.translate()
-                print (snp.snpID, BE, snp.readingFrame)
-                print (originalProtein)
-                print (finalSeq.translate())
-                print (finalSeq)
                 if max_num==1:
                     clean_list.append(BE)
                 if originalProtein==protein_seq_new:
