@@ -255,15 +255,5 @@ def Mainupload(DB):
         except:
             print ("Error: %s is not an appropriate snp" %snp.snpID)
 
-        #if isStopCodon(snp.seq5, snp.mutation, snp.seq3, snp.readingFrame)==True:
-            #print ("mutation in snp %s resulted in a stop codon " % snp.snpID)
-        #if isStopCodon(snp.seq5, snp.wt, snp.seq3, snp.readingFrame)==True:
-            #print ("wt of snp %s results in a stop codon " % snp.snpID)
-    # empty_keys = [k for k, v in matches.items() if v == []]
-    # print("matches:", 27257 - (len(empty_keys)))
-    # empty_keys = [k for k, v in cleanMatchdic.items() if v == []]
-    # print ("clean:", 27257-(len(empty_keys)))
-    # empty_keys = [k for k, v in quietMatchdic.items() if v == []]
-    # print("quiet:", 27257 - (len(empty_keys)))
     return matches, cleanMatchdic, quietMatchdic, rsltsDic
 

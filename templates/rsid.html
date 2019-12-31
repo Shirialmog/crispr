@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section col-md-12">
+        <form method="POST" action="" novalidate>
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group div">
+                <div class="row">
+                    <div class="col-md-4 ">
+                        <div class="form-group">
+                            {{ form.rsID.label(class="form-control-label") }}
+                        </div>
+                    </div>
+                    <div class="col-md-4 ">
+                        <div class="form-group">
+                            {{ form.rsID(class="form-control", placeholder="rs6256") }}
+
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="form-group">
+                            {{ form.submitrsID(class="btn btn-outline-info") }}
+                        </div>
+                    </div>
+            </fieldset>
+        </form>
+    </div>
+
+    {% if result %}
+        {% for option in result %}
+            <p> {{ option, result[option] }}</p>
+        {% endfor %}
+    {% endif %}
+{% endblock content %}

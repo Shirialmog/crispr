@@ -10,26 +10,19 @@ def printPamSeq(seq5,activationWindow,seq3, locfromEnd,PAM):
     return printPAM
 
 def SpecialCleanMatch(snp, Matches, BElist,rev,originalProtein):
-    print('m')
     clean_dic={}
-    clean_list=[]
     quiet_dic={}
-    quiet_list=[]
     locations_dic={}
     origProtein_dic={}
     for BE in Matches:
+        clean_list = []
+        quiet_list = []
         if BElist[BE][5] == "U":
             seq3 = snp.seq3
             seq5=snp.seq5
         else:
             seq3 = snp.seq5[::-1]  # get reverse
             seq5 = snp.seq3[::-1]  # get reverse
-        totalSeq1 = seq5 + snp.mutation + seq3
-        totalSeq2 = seq5 + snp.wt + seq3
-        printSeq5 = seq5  # for results
-        printSeq3 = seq3  # for results
-        diff = 0
-
 
         PAM=BElist[BE][0]
         start=BElist[BE][1]-1
@@ -63,10 +56,6 @@ def SpecialCleanMatch(snp, Matches, BElist,rev,originalProtein):
             protein_seq = Seq(totalSeq2).reverse_complement().translate()
 
         origProtein_dic[BE]=protein_seq
-        #clean_list = []
-        #quiet_list = []
-        max_num = 0
-        protein_match = False
 
         origMutSeq = {}
         printPam = {}
@@ -100,12 +89,8 @@ def SpecialCleanMatch(snp, Matches, BElist,rev,originalProtein):
                 beginningP = Seq(
                     totalSeq1[0:len(printSeq3) - locFromEnd + len(printSeq5) - end])
                 endP = Seq(totalSeq1[len(printSeq3) - locFromEnd + len(printSeq5) - start + 1:])
-                oldShowSeq = totalSeq1[0:loc - end - diff] + "<b>" + activation_window + "</b>" + totalSeq1[
-                                                                                                  loc - start:]
-                finalShowSeq[loc] = totalSeq1[0:loc - end - diff] + "<b>" + new_AW + "</b>" + totalSeq1[loc - start:]
+                #finalShowSeq[loc] = totalSeq1[0:loc - end - diff] + "<b>" + new_AW + "</b>" + totalSeq1[loc - start:]
                 origMutSeq[loc] = printSeq5 + "<b>" + snp.mutation + "</b>" + printSeq3
-                origRevSeq = ''
-                # printPam[loc] = printPamSeq(printSeq5, new_AW, printSeq3, locFromEnd, PAM)
                 printPam[loc] = printPamSeq(beginningP, new_AW, endP, locFromEnd, PAM)
             else:
                 finalSeq2 = totalSeq1[0:loc - end] + new_AW + totalSeq1[loc - start + 1:]
@@ -120,39 +105,24 @@ def SpecialCleanMatch(snp, Matches, BElist,rev,originalProtein):
                 finalShowSeq[loc] = endP + "<class style='color:blue'><b>" + new_AW + "</b></class>" + beginningP
                 origMutSeq[loc] = Seq(printSeq3).reverse_complement() + "<b>" + Seq(
                     snp.mutation).reverse_complement() + "</b>" + Seq(printSeq5).reverse_complement()
-                origRevSeq = printSeq5 + "<b>" + snp.mutation + "</b>" + printSeq3
                 printRevCorSeq[loc] = printPamSeq(beginningP.reverse_complement(), new_AW.reverse_complement(),
                                                   endP.reverse_complement(), locFromEnd, PAM)
                 printPam[loc] = printPamSeq(beginningP.reverse_complement(), old_AW.reverse_complement(),
                                             endP.reverse_complement(), locFromEnd, PAM)
-            # if rev == False:
-            #     finalSeq = Seq(totalSeq1[0:loc - end] + str(new_AW) + totalSeq1[loc - start + 1:])
-            # else:
-            #     beginningP = Seq(
-            #         totalSeq1[0:len(printSeq3) - locFromEnd + len(printSeq5) - end]).reverse_complement()
-            #     new_AW = Seq(new_AW).reverse_complement()
-            #     # endP=Seq(totalSeq1[loc - start:]).reverse_complement()
-            #     endP = Seq(
-            #         totalSeq1[len(printSeq3) - locFromEnd + len(printSeq5) - start + 1:]).reverse_complement()
-            #     finalSeq = endP + new_AW + beginningP
+
             protein_seq_new = finalSeq.translate()
             if max_num==1:
-                clean_list.append(BE)
-            print (BE,originalProtein)
-            print (BE,protein_seq_new)
+                clean_list.append(loc)
             if originalProtein==protein_seq_new:
-                print ('true')
                 protein_match=True
 
             if protein_match==True:
-                quiet_list.append(BE)
-            print ('list', quiet_list)
+                quiet_list.append(loc)
         clean_dic[BE] = [origMutSeq, printPam, printRevCorSeq, finalShowSeq, PAM, clean_list, rev]
-
-        # quiet_list=quietCheck(snp,seq5,seq3,locations_dic,rev,BE,start,end)
         quiet_dic[BE] = [origMutSeq, printPam, printRevCorSeq, finalShowSeq, PAM, quiet_list, rev]
 
-    return clean_dic, quiet_dic, origMutSeq, origRevSeq, locations_dic
+
+    return clean_dic, quiet_dic, origMutSeq, locations_dic
     #return clean_list,quiet_list
 
 

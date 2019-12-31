@@ -1,2 +1,2 @@
-A="hello my name is tom"
-print (A[:-2], A[-1])
+A='GGAGCCCTGTTTTTAGGAACTACAT'
+print (A[1:3])

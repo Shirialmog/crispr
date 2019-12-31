@@ -1,31 +1,44 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>Contact</h1>
+    <h1 >About</h1>
     <div class="content-section">
-        <form method="POST" action="/process">
-            {{ form.hidden_tag() }}
-            <fieldset class="form-group">
-                <div class="form-group">
+        <p> BE-FF (Base Editors Functional Finder) identifies base editors that can repair a given single-nucleotide variation. Currently BE-FF simulates base editing by 26 unique base editors (17 CBEs and 9 ABEs) for all queries: </p>
+        <img src="./static/Base editor_1.jpg" width="700" height="900" alt="BEFF">
+        <P><b> For additional questions and suggestions please contact royr2@mail.tau.ac.il</b> <br><br>
 
-                    {{ form.message.label(class="form-control-label") }}
+            <b><u>Related references:</u></b><br>
+<b>For CRISPR:</b><br>
+•	Jinek,M., Chylinski,K., Fonfara,I., Hauer,M., Doudna,J.A. and Charpentier,E. (2012) A programmable dual-RNA-guided DNA endonuclease in adaptive bacterial immunity. Science. 337, 816–21.<br>
+•	Cong,L., Ran,F.A., Cox,D., Lin,S., Barretto,R., Habib,N., Hsu,P.D., Wu,X., Jiang,W., Marraffini,L.A., et al. (2013) Multiplex genome engineering using CRISPR/Cas systems. Science. 339, 819–23.<br><br>
+            <b>For Base editing:</b><br>
+            	<i><u>For all base editors:</u></i><br>
+Komor,A.C., Kim,Y.B., Packer,M.S., Zuris,J.A. and Liu,D.R. (2016) Programmable editing of a target base in genomic DNA without double-stranded DNA cleavage. Nature, 533, 420–424.<br>
+            <i><u>For ABE:</u></i><br>
+Gaudelli,N.M., Komor,A.C., Rees,H.A., Packer,M.S., Badran,A.H., Bryson,D.I. and Liu,D.R. (2017) Programmable base editing of A•T to G•C in genomic DNA without DNA cleavage. Nature, 551, 464–471.<br><br>
+            <b>References for specific base editors: (according to the BEs table)</b><br>
+1. Komor,A.C., Kim,Y.B., Packer,M.S., Zuris,J.A. and Liu,D.R. (2016)
+        Programmable editing of a target base in genomic DNA without double-stranded DNA cleavage. Nature, 533, 420–424.<br><br>
+2. Rees,H.A., Komor,A.C., Yeh,W.-H., Caetano-Lopes,J., Warman,M., Edge,A.S.B. and Liu,D.R.
+        (2017) Improving the DNA specificity and applicability of base editing through protein engineering and
+        protein delivery. Nat. Commun., 8, 15790.<br><br>
+3. Komor,A.C., Zhao,K.T., Packer,M.S., Gaudelli,N.M., Waterbury,A.L., Koblan,L.W., Kim,Y.B., Badran,A.H. and Liu,D.R. (2017) Improved base excision repair inhibition and bacteriophage Mu Gam protein yields C:G-to-T:A base editors with higher efficiency and product purity. Sci. Adv., 3, eaao4774. <br><br>
+4. Koblan,L.W., Doman,J.L., Wilson,C., Levy,J.M., Tay,T., Newby,G.A., Maianti,J.P., Raguram,A. and Liu,D.R. (2018) Improving cytidine and adenine base editors by expression optimization and ancestral reconstruction. Nat. Biotechnol., 36, 843–846.<br><br>
+5. Kim,Y.B., Komor,A.C., Levy,J.M., Packer,M.S., Zhao,K.T. and Liu,D.R. (2017) Increasing the genome-targeting scope and precision of base editing with engineered Cas9-cytidine deaminase fusions. Nat. Biotechnol., 35, 371–376.<br><br>
+6. Li,X., Wang,Y., Liu,Y., Yang,B., Wang,X., Wei,J., Lu,Z., Zhang,Y., Wu,J., Huang,X., et al. (2018) Base editing with a Cpf1-cytidine deaminase fusion. Nat. Biotechnol., 36, 324–327.<br><br>
+7. Nishida,K., Arazoe,T., Yachie,N., Banno,S., Kakimoto,M., Tabata,M., Mochizuki,M., Miyabe,A., Araki,M., Hara,K.Y., et al. (2016) Targeted nucleotide editing using hybrid prokaryotic and vertebrate adaptive immune systems. Science, 353, aaf8729–aaf8729.<br><br>
+8. Nishimasu,H., Shi,X., Ishiguro,S., Gao,L., Hirano,S., Okazaki,S., Noda,T., Abudayyeh,O.O., Gootenberg,J.S., Mori,H., et al. (2018) Engineered CRISPR-Cas9 nuclease with expanded targeting space. Science, 361, 1259–1262.<br><br>
+9. Hu,J.H., Miller,S.M., Geurts,M.H., Tang,W., Chen,L., Sun,N., Zeina,C.M., Gao,X., Rees,H.A., Lin,Z., et al. (2018) Evolved Cas9 variants with broad PAM compatibility and high DNA specificity. Nature, 556, 57–63.<br><br>
+10. Gehrke,J.M., Cervantes,O., Clement,M.K., Wu,Y., Zeng,J., Bauer,D.E., Pinello,L. and Joung,J.K. (2018) An APOBEC3A-Cas9 base editor with minimized bystander and off-target activities. Nat. Biotechnol., 36, 977–982.<br><br>
+11. Jiang,W., Feng,S., Huang,S., Yu,W., Li,G., Yang,G., Liu,Y., Zhang,Y., Zhang,L., Hou,Y., et al. (2018) BE-PLUS: a new base editing tool with broadened editing window and enhanced fidelity. Cell Res., 28, 855–861.<br><br>
+12. Oakes,B.L., Fellmann,C., Rishi,H., Taylor,K.L., Ren,S.M., Nadler,D.C., Yokoo,R., Arkin,A.P., Doudna,J.A. and Savage,D.F. (2019) CRISPR-Cas9 Circular Permutants as Programmable Scaffolds for Genome Modification. Cell, 176, 254-267.e16.<br><br>
+13. Huang,T.P., Zhao,K.T., Miller,S.M., Gaudelli,N.M., Oakes,B.L., Fellmann,C., Savage,D.F. and Liu,D.R. (2019) Circularly permuted and PAM-modified Cas9 variants broaden the targeting scope of base editors. Nat. Biotechnol., 37, 626–631.<br><br>
+14. Thuronyi,B.W., Koblan,L.W., Levy,J.M., Yeh,W.-H., Zheng,C., Newby,G.A., Wilson,C., Bhaumik,M., Shubina-Oleinik,O., Holt,J.R., et al. (2019) Continuous evolution of base editors with expanded target compatibility and improved activity. Nat. Biotechnol., 37, 1070–1079.<br><br>
+15. Gaudelli,N.M., Komor,A.C., Rees,H.A., Packer,M.S., Badran,A.H., Bryson,D.I. and Liu,D.R. (2017) Programmable base editing of A•T to G•C in genomic DNA without DNA cleavage. Nature, 551, 464–471.<br><br>
+16. Ryu,S.-M., Koo,T., Kim,K., Lim,K., Baek,G., Kim,S.-T., Kim,H.S., Kim,D.-E., Lee,H., Chung,E., et al. (2018) Adenine base editing in mouse embryos and an adult mouse model of Duchenne muscular dystrophy. Nat. Biotechnol., 36, 536–539.<br><br>
+17. Hua,K., Tao,X. and Zhu,J.-K. (2019) Expanding the base editing scope in rice by using Cas9 variants. Plant Biotechnol. J., 17, 499–504.<br><br>
+18. Yang,L., Zhang,X., Wang,L., Yin,S., Zhu,B., Xie,L., Duan,Q., Hu,H., Zheng,R., Wei,Y., et al. (2018) Increasing targeting scope of adenosine base editors in mouse and rat embryos through fusion of TadA deaminase with Cas9 variants. Protein Cell, 9, 814–819.<br><br>
 
-                    {% if form.message.errors %}
-                        {{ form.message(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.message.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.message(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-            </fieldset>
-        <div class="form-group">
-                {{ form.submit(class="btn btn-outline-info") }}
-        </div>
-        </form>
-        <p> Or email us at shirialmog1@gmail.com </p>
+</P>
     </div>
 
 {% endblock %}

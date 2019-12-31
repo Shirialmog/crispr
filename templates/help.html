@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<head>
+<Title> Help</Title>
+</head>
+    <body>
+    <h1> <class style='color:black'>Help</class></h1>
+
+    <p > <b>BE-FF (Base Editors Functional Finder) </b> is a pythonic tool that identifies suitable base editors to repair a given single nucleotide variation (SNV).
+The web tool does not require any registration, installation or additional plugins.
+By inserting the reference and variation nucleotides, BE-FF attempts to find base editors that provide precise correction. In such cases, the base editing outcome is identical to the reference DNA sequence. The precise correction results are reported in the upper table of results.
+        The two alleles will be translated, and BE-FF will compare the translated sequences to identify synonymous corrections. Meaning, the resulted DNA sequence is not identical to the reference sequence; however, the resulted protein sequence is rescued by synonymous mutations and matches the reference protein sequence. The synonymous correction results are reported in the lower table of results. </p>
+
+    <p class="h2">Getting started </p>
+    <p> There are three possible input methods:<br>
+    1. Insert the SNP ID (rsID) to fetch the data from dbSNP.<br>
+    2. You can manually insert the reference / variation sequence of interest by entering the 25nt sequence upstream to the
+        variation, reference nucleotide (upper-mid box), variation nucleotide
+        (lower-mid box) and the 25nt sequence downstream to the variation.
+        It is recommended to indicate the correct reading frame of the sequence.
+        Otherwise, BE-FF will not be able to provide synonymous corrections for the variation).
+    Please note that only ATCG notes are applicable in the sequences text boxes
+        (both upper and lower cases accepted). <br>
+        3. For multiple SNVs, you may download the template form, type in your sequences and upload the file. Automatically the results file will be downloaded to your computer. </p>
+    <img src="./static/Input_methods.png" width="600" height="400" alt="Input methods">
+    <br> <br>
+    <p>The reading frame value (1,2 or 3)
+        determines the position of the varying nucleotide within the codon:</p>
+
+        <img src="./static/readingframe.png" width="600" height="200" alt="Reading Frame">
+        <br>
+    <br>
+        <p class="h5">Reading the results output</p>
+        <p>Each gray row represents a candidate base editor (or a group of base editors) that can repair the given SNV.
+    The variant nucleotide is in bold text, the PAM is in pink and the activity window is in blue.
+    You may click on the gray row to close and re-open the detailed results.
+    </p>
+    <div>
+    <img src="./static/results.jpg" width="700" height="200" alt="Results">
+    </div>
+    <br>
+    <br>
+
+    <p class=h6> For other questions / suggestions, please contact royr2@mail.tau.ac.il </p>
+    </body>
+{% endblock content %}

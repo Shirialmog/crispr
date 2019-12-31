@@ -14,7 +14,7 @@
                         <div class="form-group">
                         <p> Here you may upload multiple SNP's as a single CSV file.
                             The file must be in <a href="/sample">this format</a> <br>
-                        After you press 'Upload', a new CSV file named "full_results.csv" will be downloaded to your computer.
+                        After you press 'Upload', a new CSV file will be downloaded to your computer.
                         How to read this file: stay tuned
                         </p>
 {#                            {{ form.inputFile.label() }}#}
@@ -31,7 +31,7 @@
                 </div>
                 {% if showresults %}
                 <div>
-                    <a href="{{ url_for('download2', filename=filename) }}">Download your file {{ filename }}</a>
+                    <a href="{{ url_for('download2', filename=filename) }}">Download your file here </a>
                 </div>
                 {% endif %}
 
