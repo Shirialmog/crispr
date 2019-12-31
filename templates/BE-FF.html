@@ -1,0 +1,429 @@
+{% extends "layout.html" %}
+{% block content %}
+    <style>
+    table {
+            font-family: arial, Sans-Serif;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        td,th{
+            border: 1px solid #0c5460;
+            padding: 8px;
+        }
+
+
+        {#tr:hover{#}
+        {#    background-color: #cfcfcf;#}
+        {#    color: black;#}
+        {#}#}
+    </style>
+    <script>
+    function select(index) {
+                    Dseq=document.getElementById("Dseq");
+                    Useq=document.getElementById("Useq");
+                    Var=document.getElementById("Var");
+                    Mut=document.getElementById("Mut");
+                    RF=document.getElementById("RF");
+                    table=document.getElementById("rsidTable");
+                    var ind= index;
+                    cells=table.rows.item(ind).cells;
+                    snp=cells.item(0).innerHTML;
+                    sequence=cells.item(1).innerHTML;
+                    read=cells.item(2).innerHTML;
+
+                    Dseq.defaultValue = sequence.slice(27,52);
+                    Useq.defaultValue = sequence.slice(0,26);
+                    Var.defaultValue = snp.slice(1,2);
+                    Mut.defaultValue = snp.slice(6,7);
+                    RF.defaultValue = read;
+
+                }
+    </script>
+    <div class="content-section col-md-12">
+        <form method="POST" action="" novalidate>
+            {{ form.rsIDf.hidden_tag() }}
+            <fieldset class="form-group div">
+                <legend class="border-bottom mb-3">Base Editors Finding Tool</legend>
+                <div class="row">
+                    <div class="col-md-4 ">
+                        <div class="form-group pt-3">
+                            {{ form.rsIDf.rsID.label(class="form-control-label") }}
+                        </div>
+                    </div>
+                    <div class="col-md-4 ">
+                        <div class="form-group pt-3">
+                            {% if form.rsIDf.rsID.errors %}
+                                {{ form.rsIDf.rsID(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.rsIDf.rsID.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="form-group">
+                                    {{ form.rsIDf.rsID(class="form-control", placeholder="rs6256") }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-1 pt-3">
+                        <input type="submit" class="btn btn-info" name="submit-rsid" value="Submit">
+                    </div>
+                </div>
+
+                {% if result[7] %}
+                    <table class="table" id="rsidTable">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col"> Mutation</th>
+                            <th scope="col"> Sequence </th>
+                            <th scope="col"> RF </th>
+                            <th scope="col">Select</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for option in result[7] %}
+
+                            <tr class="datarow">
+                                <td> {{ option[0] }}</td> <td> {{ option[1] }}</td><td> {{ option[2] }}</td>
+                                <td>
+                                <button type="button" class="btn btn-info mb-2" onclick="select({{ loop.index }})">Select</button>
+                                </td>
+
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
+                {% elif result[7]=={}%}
+                    <div class="alert alert-danger" role="alert">
+                        rsID unavailable
+                    </div>
+
+                {% endif %}
+
+
+            </fieldset>
+        </form>
+        <form method="POST" action="" novalidate>
+            {{ form.DNAf.hidden_tag() }}
+            <fieldset class="form-group div">
+                <div class="row pt-3">
+                    <div class="col-md-5">
+                        <div class="form-group pt-4">
+                            {% if form.DNAf.upSeq.errors %}
+                                {{ form.DNAf.upSeq(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.DNAf.upSeq.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.DNAf.upSeq(class="form-control", placeholder="Upstream Sequence") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            {% if form.DNAf.WT.errors %}
+                                {{ form.DNAf.WT(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.DNAf.WT.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.DNAf.WT(class="form-control", placeholder="Reference", maxlength="1" ) }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {% if form.DNAf.mutation.errors %}
+                                {{ form.DNAf.mutation(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.DNAf.mutation.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.DNAf.mutation(class="form-control",placeholder="Variant",maxlength="1") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-5 ">
+                        <div class="form-group pt-4" >
+                            {% if form.DNAf.downSeq.errors %}
+                                {{ form.DNAf.downSeq(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.DNAf.downSeq.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.DNAf.downSeq(class="form-control", placeholder="Downstream Sequence") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row pt-3">
+                    <div class="col-md-2 mt-3">
+                        {{ form.DNAf.readingFrame.label(class="form-check-label") }}
+                    </div>
+                    <div class="col-md-2 mt-3">
+                            {{ form.DNAf.readingFrame(class="form-control") }}
+                    </div>
+                </div>
+
+            <div class="row pt-3 pl-3">
+                <a class="btn btn-secondary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    Show Advanced Options </a>
+            </div>
+            <div class="container">
+                <div class="row pl-2">
+                    <div class="collapse" id="collapseExample">
+                        <div class="row pl-2">
+                            <div class="col pt-3">
+                                <p> Optional: Enter a customized PAM here</p>
+                            </div>
+                        </div>
+                        <div class="form-row pl-2">
+                            <div class="col-md-1 pl-3 ">
+                                {{ form.DNAf.PAM.label(class="col-form-label") }}
+                            </div>
+                            <div class="col-md-2">
+                                {{ form.DNAf.PAM(class='form-control', placeholder="NGG") }}
+                            </div>
+                            <div class="col-md-4 pl-2 ">
+                                {{ form.DNAf.PAMstart.label(class="col-form-label") }}
+                            </div>
+                            <div class="col-md-2 ">
+                                {{ form.DNAf.PAMstart(class='form-control', placeholder="12") }}
+                            </div>
+                            <div class="col-md-2">
+                                {{ form.DNAf.PAMend(class='form-control', placeholder="17") }}
+                            </div>
+                        </div>
+                        <div class="form-row pt-3 pl-3">
+                            <div class="col-md-1 ">
+                                {{ form.DNAf.pambase.label(class="col-form-label") }}
+                            </div>
+                            <div class="col-md-2">
+                                {{ form.DNAf.pambase(class='form-control', placeholder="C") }}
+                            </div>
+                            <div class="col-md-2 pl-3 ">
+                                {{ form.DNAf.pamstream.label(class="col-form-label") }}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form.DNAf.pamstream(class='form-control', placeholder="U/D") }}
+                            </div>
+                            <div class="col-md-1 pl-0 ">
+                                <button type="button" class="btn btn-info mb-2" onclick="clearPAM()">Clear</button>
+                            </div>
+                        </div>
+
+
+                    </div>
+            </div>
+            </div>
+
+            <br>
+            <script>
+
+
+
+                function reading(number) {
+                    readingFrame = number;
+                    console.log(readingFrame)
+                }
+                function loadSample(){
+                    Dseq=document.getElementById("Dseq");
+                    Useq=document.getElementById("Useq");
+                    Var=document.getElementById("Var");
+                    Mut=document.getElementById("Mut");
+                    RF=document.getElementById("RF");
+                    Dseq.defaultValue="CGGTAACTGGGAGAGGGAGCCCCTC";
+                    Useq.defaultValue="CCTGGACCCTAATGATTTTGACTTC";
+                    Var.defaultValue="A";
+                    Mut.defaultValue="G";
+                    RF.defaultValue="1";
+
+                }
+
+                function clearSample() {
+                    Dseq = document.getElementById("Dseq");
+                    Useq = document.getElementById("Useq");
+                    Var = document.getElementById("Var");
+                    Mut = document.getElementById("Mut");
+                    RF=document.getElementById("RF");
+                    Dseq.defaultValue = "";
+                    Useq.defaultValue = "";
+                    Var.defaultValue = "";
+                    Mut.defaultValue = "";
+                    RF.defaultValue='';
+                }
+                function clearPAM() {
+                    pam = document.getElementById("PAM");
+                    start = document.getElementById("start");
+                    end = document.getElementById("end");
+                    fromto = document.getElementById("fromto");
+                    stream=document.getElementById("stream");
+                    pam.defaultValue = "";
+                    start.defaultValue = "";
+                    end.defaultValue = "";
+                    fromto.defaultValue = "0";
+                    stream.defaultValue="0";
+                }
+
+                </script>
+
+
+            <div class="row">
+                <div class="col-md-2 pr-0">
+                    <button type="button" class="btn btn-info mb-2" onclick="loadSample()">Load Example</button>
+                </div>
+                <div class="col-md-1 pl-0 ">
+                    <button type="button" class="btn btn-info mb-2" onclick="clearSample()">Clear</button>
+                </div>
+{#                <div class="form-group">#}
+{#                    {{ form.DNAf.submit(class="btn btn-outline-info") }}#}
+{#                </div>#}
+                <div class="col-md-1">
+                    <input type="submit" class="btn btn-info" name="submit-DNA" value="Submit">
+                </div>
+            </div>
+
+
+                <div class="form-group">
+                    <label for="exampleFormControlFile1">Alternatively,
+                    you may upload multiple SNPs in a CSV file, on  <a href="/upload">this page.</a></label>
+                </div>
+                </fieldset>
+    </form>
+
+    </div>
+
+
+
+    <div class="content-section col-md-12">
+        <legend class="border-bottom mb-4">Results</legend>
+{#        {% if result=={},{},'','','','',{} %} This SNP cannot be fixed with our tool! Check out the instructions above to see which SNPs are legal#}
+        {% if result %}
+            <p> Original Ref. Sequence: {{ result[2]|safe}}  </p>
+            <p> Original Var. Sequence: {{ result[3]|safe}}  </p>
+            <div class="alert alert-primary wrapit">
+                <div class="content-section col-md-12">
+                    The following base editors will correct this variance (and no other bases around it): <br>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col"> Base Editor</th>
+                                <th scope="col"> Corrected Sequence </th>
+                                <th scope="col"> PAM </th>
+                            </tr>
+                        </thead>
+                    <tbody id="cleanTable">
+                    {% for key in result[0] %}
+                        {% if result[0][key][5]!=[]%}
+                            <tr class="breakrow">
+                                <th > {{ key}} </th><td> Click to show/hide detailed result </td><td>{{ result[0][key][4] |safe}}</td>
+                            </tr>
+                        {% endif %}
+                        {% for loc in result[0][key][5] %}
+                            <tr class="datarow">
+                            {% if result[0][key][6]==False %}
+                                <td>{% if loop.length>1 %} Option {{loop.index}} {% endif %} </td><td>  <u>Original Mutation: </u><br>{{ result[0][key][0][loc] |safe}} <br>
+                                <u>Corrected:</u><br>{{ result[0][key][1][loc] | safe }}<td>{{ result[0][key][4] |safe}}</td>
+                                {% else %}
+
+                                <td> {% if loop.length>1 %} Option {{loop.index}} {% endif %}</td><td>  <u>Original Mutation: </u><br>{{ result[0][key][0][loc] |safe}} <br>
+                                <u>Reverse Complement:</u><br>{{ result[0][key][1][loc] | safe }}
+                                <u><br> Corrected Reverse Complement:</u><br>{{ result[0][key][2][loc]|safe }}<br><u>Final:</u><br> {{ result[0][key][3][loc]|safe }}</td>
+                                <td> {{ result[0][key][4] |safe}} </td>
+                            {% endif %}
+                            </tr>
+
+                        {% endfor %}
+                    {% endfor %}
+
+                    </tbody>
+                    </table>
+
+                </div>
+
+                {% if RF!='0' %}
+                    <div class="content-section col-md-12">
+                        The following base editors will correctly edit the SNP. However it may also edit other flanking nucleotides. Such changes are synonymous substitutions and the resulted amino acid sequence will probably be as good as the reference sequence: <br>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col" > Base Editor</th>
+                                    <th scope="col"> Corrected Sequence </th>
+                                    <th scope="col"> PAM</th>
+                                </tr>
+                            </thead>
+                        <tbody id="quietTable">
+                        {% for key in result[1] %}
+                            {% if result[1][key][5]!=[] %}
+                                <tr class="breakrow">
+                                    <th > {{ key}} </th><td> Click to show/hide detailed result </td><td>{{ result[1][key][4] |safe}}</td>
+                                </tr>
+                            {% endif %}
+                            {% for loc in result[1][key][5] %}
+                                <tr class="datarow">
+                                {% if result[1][key][6]==False %}
+                                    <td>{% if loop.length>1 %} Option {{loop.index}} {% endif %} </td><td>  <u>Original Mutation: </u><br>{{ result[1][key][0][loc] |safe}} <br>
+                                    <u>Corrected:</u><br>{{ result[1][key][1][loc] | safe }}
+                                    {% else %}
+
+                                    <td> {% if loop.length!=1 %} Option {{loop.index}} {% endif %}</td><td> <u> Original Mutation:</u> <br>{{ result[1][key][0][loc] |safe}} <br>
+                                    <u>Reverse Complement:</u><br>{{ result[1][key][1][loc] | safe }}
+                                    <br> <u>Corrected Reverse Complement:</u><br>{{ result[1][key][2][loc]|safe }}<br><u>Final:</u><br> {{ result[1][key][3][loc]|safe }}</td>
+                                    <td> {{ result[1][key][4] |safe}} </td>
+                                {% endif %}
+                                </tr>
+
+                            {% endfor %}
+                        {% endfor %}
+                        {% for key in result[6] if key not in result[1] %}
+                            {% if result[6][key][5]!=[]%}
+                                <tr class="breakrow">
+                                    <th > {{ key}} </th><td> Click to show/hide detailed result </td><td>{{ result[6][key][4] |safe}}</td>
+                                </tr>
+                            {% endif %}
+                            {% for loc in result[6][key][5] %}
+                                <tr class="datarow">
+                                {% if result[6][key][6]==False %}
+                                    <td>{% if loop.length>1 %} Option {{loop.index}} {% endif %} </td><td>  <u>Original Mutation:</u> <br>{{ result[6][key][0][loc] |safe}} <br>
+                                    <u>Corrected:</u><br>{{ result[6][key][1][loc] | safe }}
+                                    {% else %}
+
+                                    <td> {% if loop.length>1 %} Option {{loop.index}} {% endif %}</td><td>  <u>Original Mutation: </u><br>{{ result[6][key][0][loc] |safe}} <br>
+                                    <u>Reverse Complement:</u><br>{{ result[6][key][1][loc] | safe }}
+                                    <br> <u> Corrected Reverse Complement:</u><br>{{ result[6][key][2][loc]|safe }}<br><u>Final:</u><br> {{ result[6][key][3][loc]|safe }}</td>
+                                    <td> {{ result[6][key][4] |safe}} </td>
+                                {% endif %}
+                                </tr>
+
+                            {% endfor %}
+                        {% endfor %}
+
+                        </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+
+            </div>
+        {% endif %}
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".breakrow").click(function () {
+                $(this).nextUntil("tr.breakrow").slideToggle(200); });
+
+        });
+    </script>
+{#    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>#}
+
+{% endblock content %}
