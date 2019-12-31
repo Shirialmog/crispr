@@ -8,9 +8,19 @@ __author__ = "Shiran Abadi"
 
 def download_file(url, filename):
 
+	f = open("log", "wa")
+	f.write("Enter download_file\n")
+	f.write("URL: %s\n" % (url))
+	f.write("Filename: %s\n" % (filename))
+	f.close()
+
 	if not os.path.exists(filename):
+		f = open("log", "wa")
+		f.write("File DNE\n")
+		f.close()
 		f = urllib.request.urlretrieve(url, filename)
 	return filename
+
 	
 
 def get_xml_filename(genome, chrom, startpos, endpos, cache_dir):
