@@ -7,31 +7,27 @@ __author__ = "Shiran Abadi"
 
 
 def download_file(url, filename):
-
-	f = open("log", "wa")
-	f.write("Enter download_file\n")
-	f.write("URL: %s\n" % (url))
-	f.write("Filename: %s\n" % (filename))
-	f.close()
-
+     #print >> sys.stderr, "filename:" + filename
 	if not os.path.exists(filename):
-		f = open("log", "wa")
-		f.write("File DNE\n")
-		f.close()
-		f = urllib.request.urlretrieve(url, filename)
+		 f = urllib.request.urlretrieve(url,filename)
 	return filename
 
 	
 
 def get_xml_filename(genome, chrom, startpos, endpos, cache_dir):
+
 	current_filename = "{0}/{1}_{2}_{3}_{4}.xml".format(cache_dir, genome, chrom, str(startpos), str(endpos))
 	return current_filename
 
 
 def get_dna_coordinates_xmlfile(genome, chromosome, startpos, endpos, cache_dir):
-	url = "http://genome.ucsc.edu/cgi-bin/das/{0}/dna?segment={1}:{2},{3}" #chr15:65637530,65637553"
+	url = "http://genome.ucsc.edu/cgi-bin/das/{0}/dna?segment={1}:{2},{3}"
+
+	#chr15:65637530,65637553"
 	current_filename = get_xml_filename(genome, chromosome, startpos, endpos, cache_dir)
+	#current_filename='user_files/results.csv'
 	current_url = url.format(genome, chromosome, startpos, endpos)
+	print(current_url)
 	download_file(current_url, current_filename)
 	return current_filename
 

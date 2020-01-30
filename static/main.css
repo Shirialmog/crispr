@@ -8,6 +8,10 @@ h1, h2, h3, h4, h5, h6 {
   color: #142063;
 }
 
+.about{
+  color: #49abbf;
+}
+
 .bg-steel {
   background-color: #5f788a;
 }
@@ -24,6 +28,10 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
 }
 
+.reference{
+  font-size: 12px;
+}
+
 .content-section {
   background: #ffffff;
   padding: 10px 20px;
@@ -31,6 +39,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 3px;
   margin-bottom: 20px;
 }
+
 
 .center_div{
     margin: 0 auto;

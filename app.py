@@ -29,10 +29,11 @@ def input():
     pamstart=""
     pamend=""
     rsid_dic=''
+    check_minor=''
     if "submit-rsid" in request.form and form.rsIDf.validate(form):
         rsid=form.rsIDf.rsID.data
-        path=os.path.join(app.root_path, "user_files")
-        tmp_dic=get_snp(rsid,path)
+        path3=os.path.join(app.root_path, "user_files")
+        tmp_dic=get_snp(rsid,path3)
         rsid_dic=[]
         for num in range(len(tmp_dic)):
             tmp=[tmp_dic[num]['SNP'],tmp_dic[num]['CDS_flanking'],tmp_dic[num]['reading_frame']]
@@ -41,7 +42,19 @@ def input():
 
 
     if "submit-DNA" in request.form and form.DNAf.validate(form):
-        readingFrame=form.DNAf.readingFrame.data
+        # if form.DNAf.readingFrame.data:
+        #     print (form.DNAf.readingFrame.data)
+        #     # if form.DNAf.readingFrame.data!='1' and form.DNAf.readingFrame.data!='2' and form.DNAf.readingFrame.data!='3':
+        #     #     readingFrame = '0'
+        #     # else:
+        #     readingFrame=form.DNAf.readingFrame.data
+        # else:
+        #     readingFrame='0'
+        readingFrame=str(form.DNAf.readingFrame.data)
+        print ("Reading",readingFrame)
+        if readingFrame=='':
+            readingFrame='0'
+        print("Reading", readingFrame)
         if form.DNAf.PAM.data:
             pam=form.DNAf.PAM.data
         if form.DNAf.PAMstart.data:
@@ -50,8 +63,8 @@ def input():
             pamend=int(form.DNAf.PAMend.data)
         #clean_dic, quiet_dic, refSeq, mutSeq, origMutSeq, locations_dic, syn_quiet = MainBE(form.upSeq.data,form.downSeq.data,
                                                                                             #form.mutation.data, form.WT.data, readingFrame)
-        clean_dic,quiet_dic, refSeq,mutSeq, origMutSeq, locations_dic,syn_quiet = MainBE(form.DNAf.upSeq.data,form.DNAf.downSeq.data,form.DNAf.mutation.data,form.DNAf.WT.data,readingFrame,pam,pamstart,pamend,form.DNAf.pambase.data,form.DNAf.pamstream.data)
-    return render_template('BE-FF.html', title="BE-FF", form=form, RF=readingFrame, result=(clean_dic,quiet_dic,refSeq,mutSeq,origMutSeq, locations_dic,syn_quiet,rsid_dic),rsdic=rsid_dic) # readingFrame=readingFrame, showReadingFrame=showReadingFrame)
+        clean_dic,quiet_dic, refSeq,mutSeq, origMutSeq, locations_dic,syn_quiet,check_minor = MainBE(form.DNAf.upSeq.data,form.DNAf.downSeq.data,form.DNAf.mutation.data,form.DNAf.WT.data,readingFrame,pam,pamstart,pamend,form.DNAf.pambase.data,form.DNAf.pamstream.data)
+    return render_template('BE-FF.html', title="BE-FF", form=form, RF=readingFrame, result=(clean_dic,quiet_dic,refSeq,mutSeq,origMutSeq, locations_dic,syn_quiet,rsid_dic,check_minor),rsdic=rsid_dic) # readingFrame=readingFrame, showReadingFrame=showReadingFrame)
 
 
 

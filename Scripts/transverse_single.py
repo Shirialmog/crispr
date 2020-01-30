@@ -144,13 +144,20 @@ def origPro(snp,rev):
         elif len(snp.seq5) % 3 == 1:
             totalSeq2 = totalSeq2[2:]
 
-    if len(totalSeq2) % 3 == 1:
+    if (len(snp.seq5)+len(snp.seq3)+1) % 3 == 1:
         totalSeq2 = totalSeq2[:-1]
-    if len(totalSeq2) % 3 == 2:
+    if (len(snp.seq5)+len(snp.seq3)+1) % 3 == 2:
         totalSeq2 = totalSeq2[:-2]
+    # if len(totalSeq2) % 3 == 1:
+    #     totalSeq2 = totalSeq2[:-1]
+    # if len(totalSeq2) % 3 == 2:
+    #     totalSeq2 = totalSeq2[:-2]
+
     totalSeq2 = Seq(totalSeq2)
+    #patchpatch
     if rev == False:
         protein_seq = totalSeq2
     else:
         protein_seq = totalSeq2.reverse_complement()
+
     return protein_seq.translate()

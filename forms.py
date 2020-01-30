@@ -4,7 +4,7 @@ from wtforms import StringField, SubmitField, SelectField, BooleanField,FormFiel
 from wtforms.validators import DataRequired, Length
 
 class rsIDform(FlaskForm):
-    rsID = StringField("If you know the rsID, enter it here:",id='rsID',validators=[DataRequired(),Length(min=4)])
+    rsID = StringField("If you know the rsID, enter it here:",id='rsID',validators=[DataRequired()])
     submitrsID = SubmitField('Submit')
 
 class DNAform(FlaskForm):
@@ -20,8 +20,8 @@ class DNAform(FlaskForm):
                           validators=[DataRequired(), Length(min=25)])
     mutation = StringField("Variant:",id="Mut", validators=[DataRequired(), Length(min=1, max=1)])
     WT = StringField("Reference:", id="Var",validators=[DataRequired(), Length(min=1, max=1)])
-    # readingFrame = StringField('Reading Frame:', id="RF", validators=None)
-    readingFrame = SelectField('Reading Frame:',choices=[('1','1'),('2','2'),('3','3'),('0','Unknown')],id="RF")
+    readingFrame = StringField('Reading Frame:', id="RF", validators=None)
+    #readingFrame = StringField('Reading Frame:',id="RF",validators=[DataRequired(),Length(min=1,max=1)])
     #showReadingFrame = BooleanField("Reading Frame:", default=True,validators=None,id='isRF')
     submit=SubmitField('Enter')
     #submitrsID = SubmitField('Submit')
@@ -40,5 +40,5 @@ class crisPAMform(FlaskForm):
     submit = SubmitField('Enter')
 
 class uploadForm(FlaskForm):
-    inputFile=FileField('Upload file here', validators=[FileAllowed(['csv'])])
+    inputFile=FileField('Upload file here', validators=[DataRequired(), FileAllowed(['csv'])])
     submit=SubmitField('Upload')

@@ -32,7 +32,10 @@ def get_snp(snp_id, temp_dir):
 	res["formal_id"] = r["SNP_ID"]
 	res["ClinicalSignificance"] = r["CLINICAL_SIGNIFICANCE"]
 	res["GENE_ID"] = r["GENE_ID"]
-	loc_attributes = re.search("(.*):(.*)", r["CHRPOS"])
+	try:
+		loc_attributes = re.search("(.*):(.*)", r["CHRPOS"])
+	except:
+		return []
 	res["chromosome"] = loc_attributes.group(1)
 	res["coordinate"] = int(loc_attributes.group(2))
 	res["fxnClass"] = r["FXN_CLASS"]
@@ -85,7 +88,7 @@ def get_snp(snp_id, temp_dir):
 				all_snps[-1]["reading_frame"] = snp_idx % 3 + 1
 				all_snps[-1]["orientation"] = "+" if mrna[snp_idx]==orig_nuc else "-"
 				all_snps[-1]["SNP"] = mrna[snp_idx] + ">" + k[0]
-				all_snps[-1]["CDS_flanking"] = mrna[max(0,snp_idx-25):min(snp_idx+26, len(mrna))]
+				all_snps[-1]["CDS_flanking"] = mrna[max(0,snp_idx-25):min(snp_idx+27, len(mrna))]
 			else:
 				all_snps[-1]["SNP"] = response_item.seq[cds_start_index+snp_idx+1] + ">" + k[0]
 

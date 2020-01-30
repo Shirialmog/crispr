@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
     <style>
+
     table {
             font-family: arial, Sans-Serif;
             border-collapse: collapse;
@@ -10,12 +11,13 @@
             border: 1px solid #0c5460;
             padding: 8px;
         }
+        .checkbox {
+            height: 20px;
+            width: 20px;
+            padding-top: 5px;
+        }
 
 
-        {#tr:hover{#}
-        {#    background-color: #cfcfcf;#}
-        {#    color: black;#}
-        {#}#}
     </style>
     <script>
     function select(index) {
@@ -31,12 +33,11 @@
                     sequence=cells.item(1).innerHTML;
                     read=cells.item(2).innerHTML;
 
-                    Dseq.defaultValue = sequence.slice(27,52);
-                    Useq.defaultValue = sequence.slice(0,26);
+                    Dseq.defaultValue = sequence.slice(26,51);
+                    Useq.defaultValue = sequence.slice(0,25);
                     Var.defaultValue = snp.slice(1,2);
                     Mut.defaultValue = snp.slice(6,7);
-                    RF.defaultValue = read;
-
+                    RF.defaultValue = read[1];
                 }
     </script>
     <div class="content-section col-md-12">
@@ -61,7 +62,7 @@
                                 </div>
                             {% else %}
                                 <div class="form-group">
-                                    {{ form.rsIDf.rsID(class="form-control", placeholder="rs6256") }}
+                                    {{ form.rsIDf.rsID(class="form-control", placeholder="e.g. rs1799971 ") }}
                                 </div>
                             {% endif %}
                         </div>
@@ -86,7 +87,7 @@
                         {% for option in result[7] %}
 
                             <tr class="datarow">
-                                <td> {{ option[0] }}</td> <td> {{ option[1] }}</td><td> {{ option[2] }}</td>
+                                <td> {{option[0]}}</td> <td>{{option[1]}}</td><td> {{option[2]}}</td>
                                 <td>
                                 <button type="button" class="btn btn-info mb-2" onclick="select({{ loop.index }})">Select</button>
                                 </td>
@@ -95,7 +96,7 @@
                         {% endfor %}
                     </tbody>
                     </table>
-                {% elif result[7]=={}%}
+                {% elif result[7]==[]%}
                     <div class="alert alert-danger" role="alert">
                         rsID unavailable
                     </div>
@@ -167,15 +168,27 @@
 
 
                 <div class="row pt-3">
-                    <div class="col-md-2 mt-3">
+
+{#                        {{ form.DNAf.readingFrame.label(class="form-check-label")}}#}
+{#                        &nbsp#}
+{#                        <select name="hall" id="hall">#}
+{#                          <option id="rf1">1</option>#}
+{#                          <option id="rf2">2</option>#}
+{#                          <option id="rf3">3</option>#}
+{#                          <option>Unknown</option>#}
+{#                        </select>#}
+                    <div class="col-md-3 mt-3 pr-0 mr-0 pl-4 ml-2">
+{#                        {{ form.DNAf.showReadingFrame(class="checkbox", checked="checked")}}#}
+{#                        &nbsp#}
                         {{ form.DNAf.readingFrame.label(class="form-check-label") }}
                     </div>
-                    <div class="col-md-2 mt-3">
-                            {{ form.DNAf.readingFrame(class="form-control") }}
+                    <div class="col-md-2 mt-2 pl-0 mr-0">
+                            {{ form.DNAf.readingFrame(class="form-control",placeholder="1/2/3") }}
                     </div>
+
                 </div>
 
-            <div class="row pt-3 pl-3">
+            <div class="row pt-5 pl-3">
                 <a class="btn btn-secondary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
                     Show Advanced Options </a>
             </div>
@@ -229,6 +242,7 @@
 
             <br>
             <script>
+
 
 
 
@@ -304,7 +318,14 @@
     </div>
 
 
-
+<script src="jspdf.min.js"></script>
+<script src="jspdf.plugin.autotable.min.js"></script>
+    <script>
+  var doc = new jsPDF()
+  // It can parse html:
+  doc.autoTable({ html: '#cleantable' })
+  doc.save('table.pdf')
+</script>
     <div class="content-section col-md-12">
         <legend class="border-bottom mb-4">Results</legend>
 {#        {% if result=={},{},'','','','',{} %} This SNP cannot be fixed with our tool! Check out the instructions above to see which SNPs are legal#}
@@ -314,7 +335,7 @@
             <div class="alert alert-primary wrapit">
                 <div class="content-section col-md-12">
                     The following base editors will correct this variance (and no other bases around it): <br>
-                    <table class="table">
+                    <table id="cleantable" class="table">
                         <thead>
                             <tr>
                                 <th scope="col"> Base Editor</th>
@@ -322,7 +343,7 @@
                                 <th scope="col"> PAM </th>
                             </tr>
                         </thead>
-                    <tbody id="cleanTable">
+                    <tbody>
                     {% for key in result[0] %}
                         {% if result[0][key][5]!=[]%}
                             <tr class="breakrow">
@@ -373,7 +394,7 @@
                                 <tr class="datarow">
                                 {% if result[1][key][6]==False %}
                                     <td>{% if loop.length>1 %} Option {{loop.index}} {% endif %} </td><td>  <u>Original Mutation: </u><br>{{ result[1][key][0][loc] |safe}} <br>
-                                    <u>Corrected:</u><br>{{ result[1][key][1][loc] | safe }}
+                                    <u>Corrected:</u><br>{{ result[1][key][1][loc] | safe }}</td> <td>{{ result[1][key][4] |safe}}</td>
                                     {% else %}
 
                                     <td> {% if loop.length!=1 %} Option {{loop.index}} {% endif %}</td><td> <u> Original Mutation:</u> <br>{{ result[1][key][0][loc] |safe}} <br>
@@ -395,7 +416,7 @@
                                 <tr class="datarow">
                                 {% if result[6][key][6]==False %}
                                     <td>{% if loop.length>1 %} Option {{loop.index}} {% endif %} </td><td>  <u>Original Mutation:</u> <br>{{ result[6][key][0][loc] |safe}} <br>
-                                    <u>Corrected:</u><br>{{ result[6][key][1][loc] | safe }}
+                                    <u>Corrected:</u><br>{{ result[6][key][1][loc] | safe }}</td>
                                     {% else %}
 
                                     <td> {% if loop.length>1 %} Option {{loop.index}} {% endif %}</td><td>  <u>Original Mutation: </u><br>{{ result[6][key][0][loc] |safe}} <br>
@@ -415,15 +436,24 @@
 
             </div>
         {% endif %}
+    {% if result[8]!='' %}
+        <p> ** Please note that minor editing may occur **</p>
+    {% endif %}
     </div>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+
+
+
     <script>
         $(document).ready(function() {
             $(".breakrow").click(function () {
                 $(this).nextUntil("tr.breakrow").slideToggle(200); });
-
-        });
+            });
     </script>
+
+
 {#    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>#}
 
 {% endblock content %}

@@ -523,7 +523,8 @@ with open('snps_with_clinvar2.csv',mode='r') as file:
         table['start_position']=row[5]
         table['end_position']=row[6]
         table['xmer']=row[7]
-        table['clinical_sig']=row[8]
+        a=(row[8]).split(',')
+        table['clinical_sig']=('.').join(a)
         table['snp']=row[9]
         table['residue']=row[10]
         table['var_type']=row[11]
@@ -531,33 +532,54 @@ with open('snps_with_clinvar2.csv',mode='r') as file:
         table['gene_ID']=row[13]
         table['reading_frame']=row[14]
         table['aaPosition']=row[15]
-        table['condition']=str(row[16])
+        cond = (row[16]).split(',')
+        table['condition']=('.').join(cond)
         total_table[gene_rsID]=table
 
 
 
 
-with open('full_results.csv', mode='w') as f:
-    f.write('snpID,Genome Assembly,Chromosome,Orientation, Start Position, End Position,5Xmer,SNP,Residue,Var Type, Gene Name, Gene ID, Reading Frame, aaPosition, BE1, BE2, BE3,HF-BE3,BE4(max),BE4-Gam,YE1-BE3,YEE-BE3, VQR-BE3,VRER-BE3,SaBE3, SaBE4,SaBE4-Gam, Sa(KKH)-BE3,Cas12a-BE,Target-AID,Target-AID-NG,xBE3,eA3A-BE3,BE-PLUS,CP-CBEmax variants,evoAPOBEC1-BE4max, evoFERNY-BE4max,evoCDA1-BE4max,ABE 7.9, ABE 7.10,ABE 7.10*,xABE,NG-ABEmax,ABESa,VQR-ABE,VRER-ABE, Sa(KKH)-ABE,CP-ABEmax variants,Clinical Significance,condition\n')
+with open('full_results.csv', mode='w',newline='') as f:
+    # f.write('snpID,Genome Assembly,Chromosome,Orientation, Start Position, End Position,5Xmer,Clinical Significane, SNP,Residue,Var Type, Gene Name, Gene ID, Reading Frame, aaPosition, Condition, BE1, BE2, BE3,HF-BE3,BE4(max),BE4-Gam,YE1-BE3,YEE-BE3, VQR-BE3,VRER-BE3,SaBE3, SaBE4,SaBE4-Gam, Sa(KKH)-BE3,Cas12a-BE,Target-AID,Target-AID-NG,xBE3,eA3A-BE3,BE-PLUS,CP-CBEmax variants,evoAPOBEC1-BE4max, evoFERNY-BE4max,evoCDA1-BE4max,ABE 7.9, ABE 7.10,ABE 7.10*,xABE,NG-ABEmax,ABESa,VQR-ABE,VRER-ABE, Sa(KKH)-ABE,CP-ABEmax variants\n')
+    f = csv.writer(f, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+    f.writerow(
+        ["snpID", "Genome Assembly","Chromosome", "Orientation", "Start Position", "End Position","5Xmer","Clinical Significane","Condition","SNP","Residue","Var Type", "Gene Name", "Gene ID", "Reading Frame", "aaPosition","BE1", "BE2", "BE3", "HF-BE3", "BE4(max)", "BE4-Gam", "YE1-BE3", "YEE-BE3", "VQR-BE3", "VRER-BE3",
+         "SaBE3", "SaBE4", "SaBE4-Gam", "Sa(KKH)-BE3", "Cas12a-BE", "Target-AID", "Target-AID-NG", "xBE3", "eA3A-BE3",
+         "BE-PLUS", "CP-CBEmax variants", "evoAPOBEC1-BE4max", "evoFERNY-BE4max", "evoCDA1-BE4max", "ABE 7.9",
+         "ABE 7.10", "ABE 7.10*", "xABE", "NG-ABEmax", "ABESa", "VQR-ABE", "VRER-ABE", "Sa(KKH)-ABE",
+         "CP-ABEmax variants"])
+
+    # output = csv.writer(f, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
+    # output.writerow([",".join(["snpID","Genome Assembly","Chromosome,Orientation", "Start Position", "End Position","5Xmer","SNP","Residue","Var Type", "Gene Name", "Gene ID", "Reading Frame", "aaPosition", "BE1", "BE2", "BE3", "HF-BE3", "BE4(max)", "BE4-Gam","YE1-BE3","YEE-BE3", "VQR-BE3","VRER-BE3","SaBE3", "SaBE4", "SaBE4-Gam", "Sa(KKH)-BE3","Cas12a-BE","Target-AID","Target-AID-NG","xBE3","eA3A-BE3","BE-PLUS","CP-CBEmax variants","evoAPOBEC1-BE4max", "evoFERNY-BE4max","evoCDA1-BE4max", "ABE 7.9","ABE 7.10","ABE 7.10*","xABE","NG-ABEmax" ,"ABESa","VQR-ABE","VRER-ABE","Sa(KKH)-ABE","CP-ABEmax variants","Clinical Significance","condition",'\n'])])
     keyList=matches.keys()
     beList=["BE1", "BE2", "BE3", "HF-BE3", "BE4(max)", "BE4-Gam","YE1-BE3","YEE-BE3", "VQR-BE3","VRER-BE3","SaBE3", "SaBE4", "SaBE4-Gam", "Sa(KKH)-BE3","Cas12a-BE","Target-AID","Target-AID-NG","xBE3","eA3A-BE3","BE-PLUS","CP-CBEmax variants","evoAPOBEC1-BE4max", "evoFERNY-BE4max","evoCDA1-BE4max", "ABE 7.9","ABE 7.10","ABE 7.10*","xABE","NG-ABEmax" ,"ABESa","VQR-ABE","VRER-ABE","Sa(KKH)-ABE","CP-ABEmax variants"]
     for key in keyList:
         mlist=[]
         for BE in beList:
-            temp=0
+            temp=''
             if key in quietMatchdic:
                 if BE in quietMatchdic[key]:
-                    temp="Quiet"
+                    temp="Synonymous"
             if key in cleanMatchdic:
                 if BE in cleanMatchdic[key]:
-                    temp="Clean"
+                    temp="Precise"
 
             mlist.append(temp)
-        if mlist!=[0]*34:
-            f.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" %(key,total_table[key]['genome_assembly'],total_table[key]['chromosome'],
-                               total_table[key]['orientation'],total_table[key]['start_position'],
-                               total_table[key]['end_position'],total_table[key]['xmer'],
-                                total_table[key]['snp'],
-                                total_table[key]['residue'],total_table[key]['var_type'],
-                               total_table[key]['gene_name'],total_table[key]['gene_ID'],
-                                total_table[key]['reading_frame'],total_table[key]['aaPosition'],mlist,total_table[key]['clinical_sig'],total_table[key]['condition']))
+        if mlist!=['']*34:
+            a=[key, total_table[key]['genome_assembly'], total_table[key]['chromosome'],
+            total_table[key]['orientation'], total_table[key]['start_position'],
+            total_table[key]['end_position'], total_table[key]['xmer'], total_table[key]['clinical_sig'], total_table[key]['condition'],
+            total_table[key]['snp'],
+            total_table[key]['residue'], total_table[key]['var_type'],
+            total_table[key]['gene_name'], total_table[key]['gene_ID'],
+            total_table[key]['reading_frame'], total_table[key]['aaPosition']]
+            for m in mlist:
+                a.append(m)
+            f.writerow(a)
+            # f.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" %(key,total_table[key]['genome_assembly'],total_table[key]['chromosome'],
+            #                    total_table[key]['orientation'],total_table[key]['start_position'],
+            #                    total_table[key]['end_position'],total_table[key]['xmer'],total_table[key]['clinical_sig'],
+            #                     total_table[key]['snp'],
+            #                     total_table[key]['residue'],total_table[key]['var_type'],
+            #                    total_table[key]['gene_name'],total_table[key]['gene_ID'],
+            #                     total_table[key]['reading_frame'],total_table[key]['aaPosition'],total_table[key]['condition'],mlist))
