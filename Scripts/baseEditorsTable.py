@@ -1,3 +1,4 @@
+#AUTHOR: Shiri Almog , shirialmog1@gmail.com
 CBElist={
     #name: [ PAM, major activity window, start ,end]
     "BE1": ["NGG",13,17,"C","T", "U"],
