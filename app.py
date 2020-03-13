@@ -1,11 +1,12 @@
+#AUTHOR: Shiri Almog , shirialmog1@gmail.com
 from flask import Flask, render_template, url_for, flash, redirect,request,send_file, send_from_directory
 from forms import DNAform, contactForm,crisPAMform, uploadForm,rsIDform,beffForm
 from Scripts.BEsingle import MainBE
-from Scripts.seqAnalysis import process_sequence
 from Scripts.siteupload import Mainsiteupload
 from Scripts.returncsv import returncsv
 from Scripts.fetch_single_rsid import get_snp
 from Scripts.fetch_genomic_seq import *
+from Scripts.fetch_by_coordinates import fetch_by_coordinates
 import os
 import secrets
 
@@ -29,44 +30,48 @@ def input():
     pamstart=""
     pamend=""
     rsid_dic=''
-    check_minor=''
+    minor_clean_list=''
+    minor_quiet_list=''
+    path3 = os.path.join(app.root_path, "user_files")
+    sequence=''
+    variation=''
+    not_found=''
     if "submit-rsid" in request.form and form.rsIDf.validate(form):
         rsid=form.rsIDf.rsID.data
-        path3=os.path.join(app.root_path, "user_files")
         tmp_dic=get_snp(rsid,path3)
         rsid_dic=[]
         for num in range(len(tmp_dic)):
             tmp=[tmp_dic[num]['SNP'],tmp_dic[num]['CDS_flanking'],tmp_dic[num]['reading_frame']]
             if tmp not in rsid_dic:
                 rsid_dic.append(tmp)
+    if "submit-coor" in request.form and form.coorf.validate(form):
+        genome = 'hg18'#form.coorf.sel.data
+        chrom=form.coorf.chromosome.data
+        pos = form.coorf.pos.data
+        pos=int(pos)
+        variation = form.coorf.variation.data
+        not_found = False
+        try:
+            sequence=fetch_by_coordinates(genome,chrom,pos,path3)
+        except:
+            not_found=True
 
+
+    if "export" in request.form:
+        print (2)
 
     if "submit-DNA" in request.form and form.DNAf.validate(form):
-        # if form.DNAf.readingFrame.data:
-        #     print (form.DNAf.readingFrame.data)
-        #     # if form.DNAf.readingFrame.data!='1' and form.DNAf.readingFrame.data!='2' and form.DNAf.readingFrame.data!='3':
-        #     #     readingFrame = '0'
-        #     # else:
-        #     readingFrame=form.DNAf.readingFrame.data
-        # else:
-        #     readingFrame='0'
         readingFrame=str(form.DNAf.readingFrame.data)
-        print ("Reading",readingFrame)
         if readingFrame=='':
             readingFrame='0'
-        print("Reading", readingFrame)
         if form.DNAf.PAM.data:
             pam=form.DNAf.PAM.data
         if form.DNAf.PAMstart.data:
             pamstart=int(form.DNAf.PAMstart.data)
         if form.DNAf.PAMend.data:
             pamend=int(form.DNAf.PAMend.data)
-        #clean_dic, quiet_dic, refSeq, mutSeq, origMutSeq, locations_dic, syn_quiet = MainBE(form.upSeq.data,form.downSeq.data,
-                                                                                            #form.mutation.data, form.WT.data, readingFrame)
-        clean_dic,quiet_dic, refSeq,mutSeq, origMutSeq, locations_dic,syn_quiet,check_minor = MainBE(form.DNAf.upSeq.data,form.DNAf.downSeq.data,form.DNAf.mutation.data,form.DNAf.WT.data,readingFrame,pam,pamstart,pamend,form.DNAf.pambase.data,form.DNAf.pamstream.data)
-    return render_template('BE-FF.html', title="BE-FF", form=form, RF=readingFrame, result=(clean_dic,quiet_dic,refSeq,mutSeq,origMutSeq, locations_dic,syn_quiet,rsid_dic,check_minor),rsdic=rsid_dic) # readingFrame=readingFrame, showReadingFrame=showReadingFrame)
-
-
+        clean_dic,quiet_dic, refSeq,mutSeq, origMutSeq, locations_dic,syn_quiet,minor_clean_list,minor_quiet_list = MainBE(form.DNAf.upSeq.data,form.DNAf.downSeq.data,form.DNAf.mutation.data,form.DNAf.WT.data,readingFrame,pam,pamstart,pamend,form.DNAf.pambase.data,form.DNAf.pamstream.data)
+    return render_template('BE-FF.html', title="BE-FF", form=form, RF=readingFrame, result=(clean_dic,quiet_dic,refSeq,mutSeq,origMutSeq, locations_dic,syn_quiet,rsid_dic,minor_clean_list,minor_quiet_list,sequence,variation,not_found),rsdic=rsid_dic,sequence=sequence,variation=variation) # readingFrame=readingFrame, showReadingFrame=showReadingFrame)
 
 @app.route('/help')
 def help():
@@ -75,6 +80,22 @@ def help():
 def contact():
     form=contactForm()
     return render_template('contact.html',title="About", form=form)
+
+@app.route('/DB',methods=['GET'])
+def DB():
+    return render_template('DB.html', title="DB")
+
+@app.route('/screenshot/')
+def screenshot():
+    return render_template('screenshot.html',title='screenshot')
+
+@app.route('/return_file_DB/')
+def return_file_DB():
+    return send_file('BE-FF_db.xlsx')
+
+@app.route('/return_file_orig/')
+def return_file_orig():
+    return send_file('Orig_DB.csv')
 
 def save_file(input_field):
     random_hex=secrets.token_hex(8)
@@ -94,7 +115,6 @@ def download():
      filepath = os.path.join(app.root_path, "user_files", 'results.csv')
      return send_file(filepath, attachment_filename='results.csv', as_attachment=True)
 
-
 @app.route('/upload',methods=['GET', 'POST'])
 def upload():
     form=uploadForm()
@@ -109,7 +129,6 @@ def upload():
         send_from_directory('user_files', filename)
 
     elif request.method=='GET':
-        # showresults=False
         result='1'
 
     return render_template('upload.html',form=form,result=result,

@@ -1,3 +1,4 @@
+{#AUTHOR: Shiri Almog , shirialmog1@gmail.com#}
 {% extends "layout.html" %}
 {% block content %}
     <style>
@@ -16,7 +17,6 @@
             width: 20px;
             padding-top: 5px;
         }
-
 
     </style>
     <script>
@@ -39,147 +39,255 @@
                     Mut.defaultValue = snp.slice(6,7);
                     RF.defaultValue = read[1];
                 }
+    function coor(sequence,variation) {
+                    Dseq=document.getElementById("Dseq");
+                    Useq=document.getElementById("Useq");
+                    Var=document.getElementById("Var");
+                    Mut=document.getElementById("Mut");
+
+                    Dseq.defaultValue = sequence.slice(26,51);
+                    Useq.defaultValue = sequence.slice(0,25);
+                    Var.defaultValue = sequence.slice(25,26);
+                    Mut.defaultValue = variation;
+
+
+                }
     </script>
     <div class="content-section col-md-12">
         <form method="POST" action="" novalidate>
             {{ form.rsIDf.hidden_tag() }}
             <fieldset class="form-group div">
                 <legend class="border-bottom mb-3">Base Editors Finding Tool</legend>
-                <div class="row">
-                    <div class="col-md-4 ">
-                        <div class="form-group pt-3">
-                            {{ form.rsIDf.rsID.label(class="form-control-label") }}
-                        </div>
-                    </div>
-                    <div class="col-md-4 ">
-                        <div class="form-group pt-3">
-                            {% if form.rsIDf.rsID.errors %}
-                                {{ form.rsIDf.rsID(class="form-control is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.rsIDf.rsID.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <div class="form-group">
-                                    {{ form.rsIDf.rsID(class="form-control", placeholder="e.g. rs1799971 ") }}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="col-md-1 pt-3">
-                        <input type="submit" class="btn btn-info" name="submit-rsid" value="Submit">
-                    </div>
+                <div class="row pl-3 pt-1">
+                    <a class="btn btn-outline-secondary" data-toggle="collapse" href="#opt1" role="button" aria-expanded="false" aria-controls="opt1">
+                         Optional: Enter rsID </a>
                 </div>
+                    <div class="container">
+                        <div class="row pl-2 pt-3">
+                            <div class="collapse" id="opt1">
+                                <div class="row pt-3 pb-3">
+                                    <div class="col">
+                                        {% if form.rsIDf.rsID.errors %}
+                                            {{ form.rsIDf.rsID(class="form-control is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.rsIDf.rsID.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.rsIDf.rsID(class="form-control", placeholder="e.g. rs1799971 ") }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-1 ">
+                                        <input type="submit" class="btn btn-info" name="submit-rsid" value="Submit">
+                                    </div>
+                                </div>
+                        </div>
 
-                {% if result[7] %}
-                    <table class="table" id="rsidTable">
-                    <thead class="thead-light">
-                        <tr>
-                            <th scope="col"> Mutation</th>
-                            <th scope="col"> Sequence </th>
-                            <th scope="col"> RF </th>
-                            <th scope="col">Select</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for option in result[7] %}
+                        {% if result[7] %}
+                            <table class="table" id="rsidTable">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th scope="col"> Mutation</th>
+                                    <th scope="col"> Sequence </th>
+                                    <th scope="col"> RF </th>
+                                    <th scope="col">Select</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for option in result[7] %}
 
-                            <tr class="datarow">
-                                <td> {{option[0]}}</td> <td>{{option[1]}}</td><td> {{option[2]}}</td>
-                                <td>
-                                <button type="button" class="btn btn-info mb-2" onclick="select({{ loop.index }})">Select</button>
-                                </td>
+                                    <tr class="datarow">
+                                        <td> {{option[0]}}</td> <td>{{option[1]}}</td><td> {{option[2]}}</td>
+                                        <td>
+                                        <button type="button" class="btn btn-info mb-2" onclick="select({{ loop.index }})">Select</button>
+                                        </td>
 
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                    </table>
-                {% elif result[7]==[]%}
-                    <div class="alert alert-danger" role="alert">
-                        rsID unavailable
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            </table>
+                        {% elif result[7]==[]%}
+                            <div class="alert alert-danger" role="alert">
+                                rsID unavailable
+                            </div>
+
+                        {% endif %}
+                        </div>
                     </div>
-
-                {% endif %}
-
-
             </fieldset>
         </form>
+
+        <form method="POST" action="" novalidate>
+            {{ form.coorf.hidden_tag() }}
+            <fieldset class="form-group div">
+                <div class="row  pl-3">
+                    <a class="btn btn-outline-secondary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                         Optional: Fetch by genomic coordinates </a>
+                </div>
+                <div class="container">
+                    <div class="row pl-2">
+                        <div class="collapse" id="collapseExample">
+                            <div class="row pt-3">
+                                <div class="col-md-5 ">
+                                    <div class="form-group">
+                                        {{ form.coorf.genome.label(class="form-control-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                    {{ form.coorf.genome(class="form-control") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5 ">
+                                    <div class="form-group">
+                                        {{ form.coorf.chromosome.label(class="form-control-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-5 ">
+                                    {% if form.coorf.chromosome.errors %}
+                                        {{ form.coorf.chromosome(class="form-control is-invalid") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.coorf.chromosome.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {{ form.coorf.chromosome(class="form-control", placeholder="e.g. 16") }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        {{ form.coorf.pos.label(class="form-control-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    {% if form.coorf.pos.errors %}
+                                        {{ form.coorf.pos(class="form-control is-invalid") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.coorf.pos.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {{ form.coorf.pos(class="form-control", placeholder="e.g. 65637553") }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        {{ form.coorf.variation.label(class="form-control-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    {% if form.coorf.variation.errors %}
+                                        {{ form.coorf.variation(class="form-control is-invalid") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.coorf.variation.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {{ form.coorf.variation(class="form-control", placeholder="e.g. A") }}
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-1 pl-3">
+                                    <input type="submit" class="btn btn-info" name="submit-coor"   value="Submit">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+            {% if result[10] %}
+                <b> Sequence:  </b>{{ result[10]    }}
+                <script>
+                    var seq='{{ result[10] }}';
+                    var vari='{{ result[11] }}';
+                    var ans= coor(seq,vari);
+                </script>
+                &nbsp
+                <button type="button" class="btn btn-info mb-2" onclick="coor(seq,vari)">Apply</button>
+
+            {% endif %}
+            {% if result[12] %}
+                <button type="button" class="btn btn-outline-danger">Not found</button>
+            {% endif %}
+
+
+
         <form method="POST" action="" novalidate>
             {{ form.DNAf.hidden_tag() }}
             <fieldset class="form-group div">
-                <div class="row pt-3">
-                    <div class="col-md-5">
-                        <div class="form-group pt-4">
-                            {% if form.DNAf.upSeq.errors %}
-                                {{ form.DNAf.upSeq(class="form-control is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.DNAf.upSeq.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form.DNAf.upSeq(class="form-control", placeholder="Upstream Sequence") }}
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            {% if form.DNAf.WT.errors %}
-                                {{ form.DNAf.WT(class="form-control is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.DNAf.WT.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form.DNAf.WT(class="form-control", placeholder="Reference", maxlength="1" ) }}
-                            {% endif %}
-                        </div>
-                        <div class="form-group">
-                            {% if form.DNAf.mutation.errors %}
-                                {{ form.DNAf.mutation(class="form-control is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.DNAf.mutation.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form.DNAf.mutation(class="form-control",placeholder="Variant",maxlength="1") }}
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="col-md-5 ">
-                        <div class="form-group pt-4" >
-                            {% if form.DNAf.downSeq.errors %}
-                                {{ form.DNAf.downSeq(class="form-control is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.DNAf.downSeq.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form.DNAf.downSeq(class="form-control", placeholder="Downstream Sequence") }}
-                            {% endif %}
-                        </div>
+            <div class="row pt-3">
+                <div class="col-md-5">
+                    <div class="form-group pt-4">
+                        {% if form.DNAf.upSeq.errors %}
+                            {{ form.DNAf.upSeq(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.DNAf.upSeq.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.DNAf.upSeq(class="form-control", placeholder="Upstream Sequence") }}
+                        {% endif %}
                     </div>
                 </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        {% if form.DNAf.WT.errors %}
+                            {{ form.DNAf.WT(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.DNAf.WT.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.DNAf.WT(class="form-control", placeholder="Reference", maxlength="1" ) }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {% if form.DNAf.mutation.errors %}
+                            {{ form.DNAf.mutation(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.DNAf.mutation.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.DNAf.mutation(class="form-control",placeholder="Variant",maxlength="1") }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-5 ">
+                    <div class="form-group pt-4" >
+                        {% if form.DNAf.downSeq.errors %}
+                            {{ form.DNAf.downSeq(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.DNAf.downSeq.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.DNAf.downSeq(class="form-control", placeholder="Downstream Sequence") }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
 
 
                 <div class="row pt-3">
 
-{#                        {{ form.DNAf.readingFrame.label(class="form-check-label")}}#}
-{#                        &nbsp#}
-{#                        <select name="hall" id="hall">#}
-{#                          <option id="rf1">1</option>#}
-{#                          <option id="rf2">2</option>#}
-{#                          <option id="rf3">3</option>#}
-{#                          <option>Unknown</option>#}
-{#                        </select>#}
-                    <div class="col-md-3 mt-3 pr-0 mr-0 pl-4 ml-2">
-{#                        {{ form.DNAf.showReadingFrame(class="checkbox", checked="checked")}}#}
-{#                        &nbsp#}
+                    <div class="col-md-2 mt-3 pr-0 mr-0 pl-4 ml-2">
+
                         {{ form.DNAf.readingFrame.label(class="form-check-label") }}
                     </div>
                     <div class="col-md-2 mt-2 pl-0 mr-0">
@@ -189,12 +297,12 @@
                 </div>
 
             <div class="row pt-5 pl-3">
-                <a class="btn btn-secondary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                <a class="btn btn-secondary" data-toggle="collapse" href="#advanced" role="button" aria-expanded="false" aria-controls="advanced">
                     Show Advanced Options </a>
             </div>
             <div class="container">
                 <div class="row pl-2">
-                    <div class="collapse" id="collapseExample">
+                    <div class="collapse" id="advanced">
                         <div class="row pl-2">
                             <div class="col pt-3">
                                 <p> Optional: Enter a customized PAM here</p>
@@ -242,9 +350,6 @@
 
             <br>
             <script>
-
-
-
 
                 function reading(number) {
                     readingFrame = number;
@@ -299,9 +404,6 @@
                 <div class="col-md-1 pl-0 ">
                     <button type="button" class="btn btn-info mb-2" onclick="clearSample()">Clear</button>
                 </div>
-{#                <div class="form-group">#}
-{#                    {{ form.DNAf.submit(class="btn btn-outline-info") }}#}
-{#                </div>#}
                 <div class="col-md-1">
                     <input type="submit" class="btn btn-info" name="submit-DNA" value="Submit">
                 </div>
@@ -328,7 +430,6 @@
 </script>
     <div class="content-section col-md-12">
         <legend class="border-bottom mb-4">Results</legend>
-{#        {% if result=={},{},'','','','',{} %} This SNP cannot be fixed with our tool! Check out the instructions above to see which SNPs are legal#}
         {% if result %}
             <p> Original Ref. Sequence: {{ result[2]|safe}}  </p>
             <p> Original Var. Sequence: {{ result[3]|safe}}  </p>
@@ -347,7 +448,7 @@
                     {% for key in result[0] %}
                         {% if result[0][key][5]!=[]%}
                             <tr class="breakrow">
-                                <th > {{ key}} </th><td> Click to show/hide detailed result </td><td>{{ result[0][key][4] |safe}}</td>
+                                <th > {{ key}} {% if key in result[8] %} ** {% endif %}</th><td> Click to show/hide detailed result </td><td>{{ result[0][key][4] |safe}}</td>
                             </tr>
                         {% endif %}
                         {% for loc in result[0][key][5] %}
@@ -387,7 +488,7 @@
                         {% for key in result[1] %}
                             {% if result[1][key][5]!=[] %}
                                 <tr class="breakrow">
-                                    <th > {{ key}} </th><td> Click to show/hide detailed result </td><td>{{ result[1][key][4] |safe}}</td>
+                                    <th > {{ key}} {% if key in result[9] %} ** {% endif %}</th><td> Click to show/hide detailed result </td><td>{{ result[1][key][4] |safe}}</td>
                                 </tr>
                             {% endif %}
                             {% for loc in result[1][key][5] %}
@@ -407,6 +508,7 @@
                             {% endfor %}
                         {% endfor %}
                         {% for key in result[6] if key not in result[1] %}
+
                             {% if result[6][key][5]!=[]%}
                                 <tr class="breakrow">
                                     <th > {{ key}} </th><td> Click to show/hide detailed result </td><td>{{ result[6][key][4] |safe}}</td>
@@ -419,7 +521,7 @@
                                     <u>Corrected:</u><br>{{ result[6][key][1][loc] | safe }}</td>
                                     {% else %}
 
-                                    <td> {% if loop.length>1 %} Option {{loop.index}} {% endif %}</td><td>  <u>Original Mutation: </u><br>{{ result[6][key][0][loc] |safe}} <br>
+                                    <td> {% if loop.length!=1 %} Option {{loop.index}} {% endif %}</td><td>  <u>Original Mutation: </u><br>{{ result[6][key][0][loc] |safe}} <br>
                                     <u>Reverse Complement:</u><br>{{ result[6][key][1][loc] | safe }}
                                     <br> <u> Corrected Reverse Complement:</u><br>{{ result[6][key][2][loc]|safe }}<br><u>Final:</u><br> {{ result[6][key][3][loc]|safe }}</td>
                                     <td> {{ result[6][key][4] |safe}} </td>
@@ -433,13 +535,15 @@
                         </table>
                     </div>
                 {% endif %}
-
+            <p> ** Please note that minor editing may occur </p>
+            <div class="col-md-1 pt-3">
+                        <input type="submit" class="btn btn-info" name="export" value="Export">
+                    </div>
             </div>
         {% endif %}
-    {% if result[8]!='' %}
-        <p> ** Please note that minor editing may occur **</p>
-    {% endif %}
+
     </div>
+
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>

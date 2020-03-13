@@ -1,3 +1,4 @@
+#AUTHOR: Shiri Almog , shirialmog1@gmail.com
 class BEseqType:
     def __init__(self,snpID,seq5,seq3, wt,mutation,readingFrame, aaPosition, geneName,geneID):
         self.snpID = snpID

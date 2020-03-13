@@ -1,3 +1,4 @@
+#AUTHOR: Shiri Almog , shirialmog1@gmail.com
 from Scripts.BEseqType import *
 from Bio.Seq import Seq
 import csv
@@ -41,7 +42,7 @@ def importSNPS(SNPfile):
 
         return rslts, rsltsDic
 
-def matchBE(snp, BElist):
+def matchBE(snp, BElist): #returns all the BE who's PAM'S are found in the given sequence
     matches_list = []
     matches = {}
     for BE in BElist:
@@ -79,6 +80,7 @@ def matchBE(snp, BElist):
         matches[snp.snpID] = matches_list
     return matches
 
+## This function takes as input the found matches_list, and checks for precise corrections
 def cleanMatch(snp, Matches, BElist,rev):
     cleanMatches={}
     clean_list=[]
@@ -98,7 +100,6 @@ def cleanMatch(snp, Matches, BElist,rev):
             totalSeq2 = seq5 + snp.wt + seq3
             printSeq5 = seq5  # for results
             printSeq3 = seq3  # for results
-            diff = 0
 
             if rev == False:
                 protein_seq = Seq(totalSeq2).translate()
@@ -123,7 +124,7 @@ def cleanMatch(snp, Matches, BElist,rev):
                     else:
                         break
                     if j == len(PAM):
-                        locations.append(i + start) #maybe j is not neccesary?
+                        locations.append(i + start)
                         break
             locations_dic[BE] = locations
 
@@ -146,16 +147,12 @@ def cleanMatch(snp, Matches, BElist,rev):
                 if num>max_num:
                     max_num=num
 
-                # finalSeq=totalSeq1[0:loc-end-diff]+new_AW+totalSeq1[loc-start:]
-                # protein_seq_new=Seq(finalSeq).translate()
-
                 if rev==False:
                     finalSeq = Seq(totalSeq1[0:loc - end] + str(new_AW) + totalSeq1[loc - start + 1:])
                 else:
                     beginningP = Seq(
                         totalSeq1[0:len(printSeq3) - locFromEnd + len(printSeq5) - end]).reverse_complement()
                     new_AW = Seq(new_AW).reverse_complement()
-                    # endP=Seq(totalSeq1[loc - start:]).reverse_complement()
                     endP = Seq(
                         totalSeq1[len(printSeq3) - locFromEnd + len(printSeq5) - start + 1:]).reverse_complement()
                     finalSeq = endP + new_AW + beginningP
@@ -240,7 +237,6 @@ def cutFromRF(snp,totalSeq1,totalSeq2,printSeq5,printSeq3):
     return totalSeq1,totalSeq2,printSeq5,printSeq3
 
 
-
 def getRevComp(snp):
     len3=len(snp.seq3)
     totalSeq= snp.seq5+snp.mutation+snp.seq3
@@ -321,8 +317,8 @@ def find_cor(base):
 def Main(DB):
     SNPS,rsltsDic=importSNPS(DB) #parsing cvs file
     matches={}
-    matches0,matches2,matches3={},{},{}
-    matchesMinor={}
+    minor_clean={}
+    minor_quiet={}
     cleanMatchdic = {}
     quietMatchdic={}
     # sort DNA. First, determine which bases we wish to replace. 4 cases:
@@ -330,9 +326,6 @@ def Main(DB):
     # 3. T to C: switch to reverse complement and use ABE
     # 4. G to A: switch to RC and use CBE
     for snp in SNPS:
-        clean=[]
-        quiet=[]
-        clean0,quiet0,clean2,quiet2,clean3,quiet3=[],[],[],[],[],[]
         rev = False
         snp = beginningCut(snp)
         if snp.mutation == "C" and snp.wt == "T":
@@ -359,11 +352,16 @@ def Main(DB):
             BElist=None
             MinorBElist=None
 
-
         try:
           # check for matches in major window
             check_match = matchBE(snp, BElist)
             matches.update(check_match)
+        except:
+            pass
+        try:
+          # check for matches in minor window
+            check_match_minor = matchBE(snp, MinorBElist)
+            matches.update(check_match_minor)
         except:
             pass
         try:
@@ -443,15 +441,27 @@ def Main(DB):
         #check for clean match
         try:
             clean, quiet,orig_protein= cleanMatch(snp,check_match,BElist,rev)
-
         except:
             clean={}
             quiet={}
             orig_protein=origPro(snp,rev)
+
         try:
-
+            clean_m, quiet_m, orig_protein_m = cleanMatch(snp, check_match_minor, MinorBElist, rev)
+            for key in clean_m:
+                minor_clean[key] = []
+                for BE in clean_m[key]:
+                    if BE in clean[key]:
+                        minor_clean[key].append(BE)
+            for key in quiet_m:
+                minor_quiet[key] = []
+                for BE in quiet_m[key]:
+                    if BE in quiet[key]:
+                        minor_quiet[key].append(BE)
+        except:
+            pass
+        try:
             clean0,quiet0=SpecialCleanMatch(snp0,check_match0,BElist0,rev0,orig_protein)
-
         except:
             quiet0=[]
         try:
@@ -481,7 +491,6 @@ def Main(DB):
         try:
             quietMatchdic.update(quiet)
             cleanMatchdic.update(clean)
-
         except:
             pass
 ## statistics ##
@@ -491,10 +500,10 @@ def Main(DB):
     print ("clean:", 22579-(len(empty_keys)))
     empty_keys = [k for k, v in quietMatchdic.items() if v == []]
     print("quiet:", 22673 - (len(empty_keys)))
-    return matches, cleanMatchdic, quietMatchdic, rsltsDic
+    return matches, cleanMatchdic, quietMatchdic, rsltsDic,minor_clean,minor_quiet
 
 
-matches, cleanMatchdic, quietMatchdic ,rsltsDic=Main("snps_with_clinvar2.csv")
+matches, cleanMatchdic, quietMatchdic ,rsltsDic,minor_clean,minor_quiet=Main("snps_with_clinvar2.csv")
 with open('matches_file.csv', mode='w') as f:
     f.write('snpID, matches\n')
     for key in matches.keys():
@@ -536,11 +545,7 @@ with open('snps_with_clinvar2.csv',mode='r') as file:
         table['condition']=('.').join(cond)
         total_table[gene_rsID]=table
 
-
-
-
 with open('full_results.csv', mode='w',newline='') as f:
-    # f.write('snpID,Genome Assembly,Chromosome,Orientation, Start Position, End Position,5Xmer,Clinical Significane, SNP,Residue,Var Type, Gene Name, Gene ID, Reading Frame, aaPosition, Condition, BE1, BE2, BE3,HF-BE3,BE4(max),BE4-Gam,YE1-BE3,YEE-BE3, VQR-BE3,VRER-BE3,SaBE3, SaBE4,SaBE4-Gam, Sa(KKH)-BE3,Cas12a-BE,Target-AID,Target-AID-NG,xBE3,eA3A-BE3,BE-PLUS,CP-CBEmax variants,evoAPOBEC1-BE4max, evoFERNY-BE4max,evoCDA1-BE4max,ABE 7.9, ABE 7.10,ABE 7.10*,xABE,NG-ABEmax,ABESa,VQR-ABE,VRER-ABE, Sa(KKH)-ABE,CP-ABEmax variants\n')
     f = csv.writer(f, delimiter=',', quoting=csv.QUOTE_MINIMAL)
     f.writerow(
         ["snpID", "Genome Assembly","Chromosome", "Orientation", "Start Position", "End Position","5Xmer","Clinical Significane","Condition","SNP","Residue","Var Type", "Gene Name", "Gene ID", "Reading Frame", "aaPosition","BE1", "BE2", "BE3", "HF-BE3", "BE4(max)", "BE4-Gam", "YE1-BE3", "YEE-BE3", "VQR-BE3", "VRER-BE3",
@@ -548,9 +553,6 @@ with open('full_results.csv', mode='w',newline='') as f:
          "BE-PLUS", "CP-CBEmax variants", "evoAPOBEC1-BE4max", "evoFERNY-BE4max", "evoCDA1-BE4max", "ABE 7.9",
          "ABE 7.10", "ABE 7.10*", "xABE", "NG-ABEmax", "ABESa", "VQR-ABE", "VRER-ABE", "Sa(KKH)-ABE",
          "CP-ABEmax variants"])
-
-    # output = csv.writer(f, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
-    # output.writerow([",".join(["snpID","Genome Assembly","Chromosome,Orientation", "Start Position", "End Position","5Xmer","SNP","Residue","Var Type", "Gene Name", "Gene ID", "Reading Frame", "aaPosition", "BE1", "BE2", "BE3", "HF-BE3", "BE4(max)", "BE4-Gam","YE1-BE3","YEE-BE3", "VQR-BE3","VRER-BE3","SaBE3", "SaBE4", "SaBE4-Gam", "Sa(KKH)-BE3","Cas12a-BE","Target-AID","Target-AID-NG","xBE3","eA3A-BE3","BE-PLUS","CP-CBEmax variants","evoAPOBEC1-BE4max", "evoFERNY-BE4max","evoCDA1-BE4max", "ABE 7.9","ABE 7.10","ABE 7.10*","xABE","NG-ABEmax" ,"ABESa","VQR-ABE","VRER-ABE","Sa(KKH)-ABE","CP-ABEmax variants","Clinical Significance","condition",'\n'])])
     keyList=matches.keys()
     beList=["BE1", "BE2", "BE3", "HF-BE3", "BE4(max)", "BE4-Gam","YE1-BE3","YEE-BE3", "VQR-BE3","VRER-BE3","SaBE3", "SaBE4", "SaBE4-Gam", "Sa(KKH)-BE3","Cas12a-BE","Target-AID","Target-AID-NG","xBE3","eA3A-BE3","BE-PLUS","CP-CBEmax variants","evoAPOBEC1-BE4max", "evoFERNY-BE4max","evoCDA1-BE4max", "ABE 7.9","ABE 7.10","ABE 7.10*","xABE","NG-ABEmax" ,"ABESa","VQR-ABE","VRER-ABE","Sa(KKH)-ABE","CP-ABEmax variants"]
     for key in keyList:
@@ -558,11 +560,23 @@ with open('full_results.csv', mode='w',newline='') as f:
         for BE in beList:
             temp=''
             if key in quietMatchdic:
-                if BE in quietMatchdic[key]:
-                    temp="Synonymous"
+                if BE in quietMatchdic[key] and key not in minor_quiet:
+                    temp = "Synonymous"
+                elif BE in quietMatchdic[key]:
+                    if BE in minor_quiet[key]:
+                        temp="*Synonymous"
+                    else:
+                        temp="Synonymous"
+
             if key in cleanMatchdic:
-                if BE in cleanMatchdic[key]:
-                    temp="Precise"
+                if BE in cleanMatchdic[key] and key not in minor_clean:
+                    temp = "Precise"
+                elif BE in cleanMatchdic[key]:
+                    if BE in minor_clean[key]:
+                        temp="*Precise"
+                    else:
+                        temp = "Precise"
+
 
             mlist.append(temp)
         if mlist!=['']*34:
@@ -576,10 +590,4 @@ with open('full_results.csv', mode='w',newline='') as f:
             for m in mlist:
                 a.append(m)
             f.writerow(a)
-            # f.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" %(key,total_table[key]['genome_assembly'],total_table[key]['chromosome'],
-            #                    total_table[key]['orientation'],total_table[key]['start_position'],
-            #                    total_table[key]['end_position'],total_table[key]['xmer'],total_table[key]['clinical_sig'],
-            #                     total_table[key]['snp'],
-            #                     total_table[key]['residue'],total_table[key]['var_type'],
-            #                    total_table[key]['gene_name'],total_table[key]['gene_ID'],
-            #                     total_table[key]['reading_frame'],total_table[key]['aaPosition'],total_table[key]['condition'],mlist))
+

@@ -3,7 +3,6 @@ from Bio.Seq import Seq
 import csv
 from Scripts.baseEditors import CBElist, CBElistMinor, ABElist, ABElistMinor, BEletter
 
-
 def importSNPS(SNPfile):
     rslts=[]
     with open(SNPfile,"r") as csv_file:
@@ -20,7 +19,6 @@ def importSNPS(SNPfile):
             the sequence is given as a string, with 25 bases before mutation and 25 after. 
             need to find length of mutation to splice properly
             """
-            mut_len=(find_mut_len-1)/2
             mutation=row[9][2]
             wt=row[9][0]
             sequence5 = row[7][0:25]
@@ -36,7 +34,6 @@ def importSNPS(SNPfile):
         for snp in rslts:
             rsltsDic[snp.snpID]=snp.geneName
             num=num+1
-
         return rslts, rsltsDic
 
 def matchBE(snp, BElist):
@@ -77,7 +74,6 @@ def matchBE(snp, BElist):
     return matches
 
 def cleanMatch(snp, Matches, BElist):
-    fnum=0
     cleanMatches={}
     clean_list=[]
     quietDic={}
@@ -96,7 +92,6 @@ def cleanMatch(snp, Matches, BElist):
             PAM=BElist[BE][0]
             start=BElist[BE][1]-1
             end=BElist[BE][2]-1
-            #direction=BElist[BE][5]
             locations=[]
             #find locations of PAM. for each location, check if clean
             window = (end - start+1)
@@ -146,7 +141,6 @@ def cleanMatch(snp, Matches, BElist):
             max_num = 0
             protein_match=False
             for loc in locations:
-                temp_seq=totalSeq1
                 loc=loc+len(snp.seq5)
                 activation_window = totalSeq1[loc-end-diff:loc-start]
                 num = 0  # number of times the variant appears within the activation window
@@ -175,20 +169,6 @@ def cleanMatch(snp, Matches, BElist):
 
     return cleanMatches, quietDic
 
-def isStopCodon (seq5, x, seq3, readingFrame):
-    #take one reading frame containing the mutation
-    totalSequence=seq5+x+seq3
-    start=len(seq5)
-    if readingFrame=="1":
-        codon=totalSequence[start:start+3]
-    elif readingFrame=="2":
-        codon=totalSequence[start-1:start+2]
-    else:
-        codon=totalSequence[start-2:start+1]
-    if codon== "TAG" or codon== "TAA" or codon== "TGA":
-        return True
-
-
 def getRevComp(snp):
     len5=len(snp.seq5)
     totalSeq= snp.seq5+snp.mutation+snp.seq3
@@ -199,9 +179,7 @@ def getRevComp(snp):
     new_snp=BEseqType(snp.snpID,seq5 ,seq3,snp.mutation,snp.wt, snp.readingFrame, snp.aaPosition,snp.geneName,snp.geneID)
     return new_snp
 
-
 def Mainupload(DB):
-    totnum=0
     SNPS,rsltsDic=importSNPS(DB) #parsing cvs file
     matches={}
     matchesMinor={}
@@ -248,9 +226,6 @@ def Mainupload(DB):
             clean, quiet= cleanMatch(snp,check_match,BElist)
             cleanMatchdic.update(clean)
             quietMatchdic.update(quiet)
-
-
-
 
         except:
             print ("Error: %s is not an appropriate snp" %snp.snpID)

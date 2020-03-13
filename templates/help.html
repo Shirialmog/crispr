@@ -1,3 +1,4 @@
+{#AUTHOR: Shiri Almog , shirialmog1@gmail.com#}
 {% extends "layout.html" %}
 {% block content %}
 
@@ -5,14 +6,15 @@
 <Title> Help</Title>
 </head>
     <body>
-    <h1> <class style='color:black'>Help</class></h1>
+    <div class="content-section col-12">
+    <legend class="border-bottom mb-3">Help</legend>
 
     <p > <b>BE-FF (Base Editors Functional Finder) </b> is a pythonic tool that identifies suitable base editors to repair a given single nucleotide variation (SNV).
 The web tool does not require any registration, installation or additional plugins.
 By inserting the reference and variation nucleotides, BE-FF attempts to find base editors that provide precise correction. In such cases, the base editing outcome is identical to the reference DNA sequence. The precise correction results are reported in the upper table of results.
         The two alleles will be translated, and BE-FF will compare the translated sequences to identify synonymous corrections. Meaning, the resulted DNA sequence is not identical to the reference sequence; however, the resulted protein sequence is rescued by synonymous mutations and matches the reference protein sequence. The synonymous correction results are reported in the lower table of results. </p>
 
-    <p class="h2">Getting started </p>
+    <p class="h4">Getting started </p>
     <p> There are three possible input methods:<br>
     1. Insert the SNP ID (rsID) to fetch the data from dbSNP.<br>
     2. You can manually insert the reference / variation sequence of interest by entering the 25nt sequence upstream to the
@@ -43,5 +45,7 @@ By inserting the reference and variation nucleotides, BE-FF attempts to find bas
     <br>
 
     <p class=h6> For other questions / suggestions, please contact royr2@mail.tau.ac.il </p>
+    </div>
     </body>
+
 {% endblock content %}

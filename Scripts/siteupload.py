@@ -1,3 +1,4 @@
+#AUTHOR: Shiri Almog , shirialmog1@gmail.com
 from Scripts.BEseqType import *
 from Bio.Seq import Seq
 import csv
@@ -14,7 +15,6 @@ def importSNPS(SNPfile):
             exit()
 
         for row in csv_read:
-            print('check2')
             if row[0]=="Sample ID/ name":
                 continue
             snpID=row[0]
@@ -48,7 +48,6 @@ def matchBE(snp, BElist):
         else:
             sequence=snp.seq5
             sequence=sequence[::-1] # get reverse
-
 
         PAM = BElist[BE][0]
         # find if PAM matches in correct place
@@ -144,16 +143,12 @@ def cleanMatch(snp, Matches, BElist,rev):
                 if num>max_num:
                     max_num=num
 
-                # finalSeq=totalSeq1[0:loc-end-diff]+new_AW+totalSeq1[loc-start:]
-                # protein_seq_new=Seq(finalSeq).translate()
-
                 if rev==False:
                     finalSeq = Seq(totalSeq1[0:loc - end] + str(new_AW) + totalSeq1[loc - start + 1:])
                 else:
                     beginningP = Seq(
                         totalSeq1[0:len(printSeq3) - locFromEnd + len(printSeq5) - end]).reverse_complement()
                     new_AW = Seq(new_AW).reverse_complement()
-                    # endP=Seq(totalSeq1[loc - start:]).reverse_complement()
                     endP = Seq(
                         totalSeq1[len(printSeq3) - locFromEnd + len(printSeq5) - start + 1:]).reverse_complement()
                     finalSeq = endP + new_AW + beginningP
@@ -190,7 +185,6 @@ def beginningCut(snp):
         snp.seq3 = snp.seq3[:-1]
     if (len(snp.seq5)+len(snp.seq3)+1) % 3 == 2:
         snp.seq3 = snp.seq3[:-2]
-
     return snp
 
 def cutFromRF(snp,totalSeq1,totalSeq2,printSeq5,printSeq3):
@@ -199,34 +193,28 @@ def cutFromRF(snp,totalSeq1,totalSeq2,printSeq5,printSeq3):
             totalSeq1 = totalSeq1[1:]
             totalSeq2 = totalSeq2[1:]
             printSeq5 = printSeq5[1:]
-            diff = 1
         elif len(snp.seq5) % 3 == 2:
             totalSeq1 = totalSeq1[2:]
             totalSeq2 = totalSeq2[2:]
             printSeq5 = printSeq5[2:]
-            diff = 2
     elif snp.readingFrame == "2":
         if len(snp.seq5) % 3 == 0:
             totalSeq1 = totalSeq1[2:]
             totalSeq2 = totalSeq2[2:]
             printSeq5 = printSeq5[2:]
-            diff = 2
         elif len(snp.seq5) % 3 == 2:
             totalSeq1 = totalSeq1[1:]
             totalSeq2 = totalSeq1[1:]
             printSeq5 = printSeq5[1:]
-            diff = 1
     elif snp.readingFrame == "3":
         if len(snp.seq5) % 3 == 0:
             totalSeq1 = totalSeq1[1:]
             totalSeq2 = totalSeq2[1:]
             printSeq5 = printSeq5[1:]
-            diff = 1
         elif len(snp.seq5) % 3 == 1:
             totalSeq1 = totalSeq1[2:]
             totalSeq2 = totalSeq2[2:]
             printSeq5 = printSeq5[2:]
-            diff = 2
     if len(totalSeq1) % 3 == 1:
         totalSeq1 = totalSeq1[:-1]
         totalSeq2 = totalSeq2[:-1]
@@ -318,10 +306,7 @@ def find_cor(base):
 
 def Mainsiteupload(DB):
     SNPS,rsltsDic=importSNPS(DB) #parsing cvs file
-    print('check')
     matches={}
-    matches0,matches2,matches3={},{},{}
-    matchesMinor={}
     cleanMatchdic = {}
     quietMatchdic={}
     # sort DNA. First, determine which bases we wish to replace. 4 cases:
@@ -329,10 +314,7 @@ def Mainsiteupload(DB):
     # 3. T to C: switch to reverse complement and use ABE
     # 4. G to A: switch to RC and use CBE
     for snp in SNPS:
-        print('check')
-        clean=[]
-        quiet=[]
-        clean0,quiet0,clean2,quiet2,clean3,quiet3=[],[],[],[],[],[]
+
         rev = False
         snp = beginningCut(snp)
         if snp.mutation == "C" and snp.wt == "T":
@@ -358,7 +340,6 @@ def Mainsiteupload(DB):
         else:
             BElist=None
             MinorBElist=None
-
 
         try:
           # check for matches in major window

@@ -1,3 +1,4 @@
+{#AUTHOR: Shiri Almog , shirialmog1@gmail.com#}
 {% extends "layout.html" %}
 {% block content %}
 
@@ -17,7 +18,6 @@
                         After you press 'Upload', a new CSV file will be downloaded to your computer.
                         How to read this file: stay tuned
                         </p>
-{#                            {{ form.inputFile.label() }}#}
                             {{ form.inputFile(class="form-control-file") }}
                             {% if form.inputFile.errors %}
                                 {% for error in form.inputFile.errors %}

@@ -1,3 +1,4 @@
+#AUTHOR: Shiri Almog , shirialmog1@gmail.com
 from Scripts.BEseqType import *
 from Bio.Seq import Seq
 from Scripts.baseEditors import CBElist, CBElistMinor, ABElist, ABElistMinor, BEletter
@@ -12,10 +13,9 @@ def matchBE(snp, BElist):
         else:
             sequence=snp.seq5
             sequence=sequence[::-1] # get reverse
-        PAM = BElist[BE][0]
 
-        # find if PAM matches in correct place
-        if len(sequence) > BElist[BE][2]:
+        PAM = BElist[BE][0]
+        if len(sequence) > BElist[BE][2]:   # find if PAM matches in correct place
             match = False
             start = BElist[BE][1] -1
             end = BElist[BE][2]-1
@@ -36,23 +36,20 @@ def matchBE(snp, BElist):
                     if j == len(PAM):
                         match = True
                         break
+
             if match is True and BE!= "eA3A-BE3": ##unique case, only works if T comes before mutation
                 matches_list.append(BE)
-            elif match is True and snp.seq5[-1]=='T':
+            elif match is True and snp.seq5[-1]=='T': #BE== "eA3A-BE3"
                 matches_list.append(BE)
     return matches_list
 
-## This function takes as input the found matches_list, and checks for precise correction
+## This function takes as input the found matches_list, and checks for precise corrections
 def cleanMatch(snp,Matches, BElist,rev):
-    printRevSeq=None
-    printRevCorSeq=None
     origMutSeq = ''
     clean_dic={}
     quiet_dic={}
     locations_dic = {}
-    locFromEndList = []
-    locFromEndDic = {}
-    originalProtein=origPro(snp,rev)
+    originalProtein=origPro(snp,rev) ##saves the original AA sequence, for comparison later
     for BE in Matches:
         if BElist[BE][5] == "U":
             seq3 = snp.seq3
@@ -69,7 +66,6 @@ def cleanMatch(snp,Matches, BElist,rev):
             protein_seq = Seq(totalSeq2).translate()
         else:
             protein_seq = Seq(totalSeq2).reverse_complement().translate()
-        origProtein = protein_seq
 
         PAM=BElist[BE][0]
         start=BElist[BE][1]-1
@@ -92,9 +88,6 @@ def cleanMatch(snp,Matches, BElist,rev):
                     locations_list.append(i + start)
                     break
         locations_dic[BE]=locations_list
-
-        diff=0
-
         clean_list = []
         quiet_list=[]
         origMutSeq = {}
@@ -118,13 +111,7 @@ def cleanMatch(snp,Matches, BElist,rev):
             new_AW=''.join(new_AW)
             if num>max_num:
                 max_num=num
-
-            # if BElist[BE][5]=='D':
-            #     totalSeq1=totalSeq1[::-1]
-            #     totalSeq2 = totalSeq2[::-1]
-            #     tmp=printSeq3
-            #     printSeq3=printSeq5
-            #     printSeq5=tmp
+            ##This is for the visual output
             if rev==False:
                 new = new_AW
                 finalSeq = Seq(totalSeq1[0:loc - end] + str(new) + totalSeq1[loc - start+1:])
@@ -160,10 +147,6 @@ def cleanMatch(snp,Matches, BElist,rev):
                                                 endP.reverse_complement(), locFromEnd, PAM, BElist[BE][5])
 
             protein_seq_new=finalSeq.translate()
-            print (BE)
-            print (finalSeq)
-            print (protein_seq)
-            print (protein_seq_new)
             if protein_seq==protein_seq_new:
                 protein_match=True
             if max_num==1:
@@ -175,27 +158,14 @@ def cleanMatch(snp,Matches, BElist,rev):
         quiet_dic[BE]=[origMutSeq,printPam,printRevCorSeq,finalShowSeq,PAM, quiet_list,rev]
 
     return clean_dic,quiet_dic,origMutSeq,locations_dic,originalProtein
-
-
-
+##For visual output
 def printPamSeq(seq5,activationWindow,seq3, locfromEnd,PAM,direction):
-    # len3 = len(seq3)
-    # printPAM = seq5 + "<class style='color:blue'><b>" + activationWindow + "</b></class>" + seq3[
-    #                                                                                         0:len3 - locfromEnd] + "<b><class style='color:#DD96F0'>" + seq3[
-    #                                                                                                                                                     len3 - locfromEnd:len3 - locfromEnd + len(
-    #                                                                                                                                                         PAM)] + "</b></class>" + seq3[
-    #                                                                                                                                                                                  len3 - locfromEnd + len(
-    #                                                                                                                                                                                      PAM):]
-    # return printPAM
-    #recieves sequence, activation window and PAM locations, returns sequence with colored PAM and window
     if direction=='U':
         len3=len(seq3)
         printPAM=seq5+"<class style='color:blue'><b>"+activationWindow+"</b></class>"+seq3[0:len3-locfromEnd]+"<b><class style='color:#DD96F0'>"+seq3[len3-locfromEnd:len3-locfromEnd+len(PAM)]+"</b></class>"+seq3[len3-locfromEnd+len(PAM):]
         return printPAM
     elif direction=='D':
         len3 = len(seq3)
-        #printPAM = seq5[len5 - locfromEnd:len5 - locfromEnd + len(PAM)] + "</b></class>" + seq5[len5 - locfromEnd + len(PAM):]+  "<class style='color:blue'><b>" + activationWindow + "</b></class>" + seq3
-        printPAM = seq5 + "<class style='color:blue'><b>" + activationWindow + "</b></class>" + seq3[0:len3 - locfromEnd] + "<b><class style='color:#DD96F0'>" + seq3[len3 - locfromEnd:len3 - locfromEnd + len( PAM)] + "</b></class>" + seq3[len3 - locfromEnd + len(PAM):]
         printPAM=seq3[len3 - locfromEnd + len(PAM):][::-1]+ "<b><class style='color:#DD96F0'>" + seq3[len3 - locfromEnd:len3 - locfromEnd + len( PAM)] [::-1]+"</b></class>"+seq3[0:len3 - locfromEnd][::-1]+ "<class style='color:blue'><b>" + activationWindow[::-1] + "</b></class>"+seq5[::-1]
         return printPAM
 
@@ -211,9 +181,8 @@ def getRevComp(snp):
     new_snp=BEseqType(snp.snpID,seq5 ,seq3,snp.mutation,snp.wt, snp.readingFrame, snp.aaPosition,snp.geneName,snp.geneID)
     return new_snp
 
-
+#this function will check the other 2 bases in the reading frame to see whether fixing them may result in a synonymous correction
 def checkRF(snp):
-    #this function will check the other 2 bases in the reading frame to see whether fixing them may result in a quiet result
     if snp.readingFrame=='1':
         zero_seq5 = snp.seq5
         zero_mutation = snp.mutation
@@ -280,9 +249,7 @@ def find_cor(base):
         return "A"
 
 def beginningCut(snp):
-    print ('1')
     if snp.readingFrame == "1":
-        print ('2')
         if len(snp.seq5) % 3 == 1:
             snp.seq5 = snp.seq5[1:]
         elif len(snp.seq5) % 3 == 2:
@@ -302,7 +269,6 @@ def beginningCut(snp):
         snp.seq3 = snp.seq3[:-1]
     if (len(snp.seq5)+len(snp.seq3)+1) % 3 == 2:
         snp.seq3 = snp.seq3[:-2]
-    print ("beginning", snp.seq5)
     return snp
 
 def delete_chars(field):
@@ -314,16 +280,16 @@ def delete_chars(field):
 
 
 def MainBE(upSeq, downSeq, mutation, wt, readingFrame,personalPAM,start,end,fromto,stream):
-    BElist={}
     upSeq_=delete_chars(upSeq.upper())
-    print (upSeq_)
     downSeq_=delete_chars(downSeq.upper())
     wt_=delete_chars(wt.upper())
     mutation_=delete_chars(mutation.upper())
     snp=BEseqType(1234,upSeq_, downSeq_, wt_, mutation_, readingFrame, 1, 12, 12)
     refSeq=snp.seq5+"<b>"+snp.wt+"</b>"+snp.seq3
     mutSeq = snp.seq5 + "<b>" + snp.mutation + "</b>" + snp.seq3
-    check_match_minor=''
+    ## initiating vars
+    minor_clean_list=[]
+    minor_quiet_list=[]
     origMutSeq = {}
     locations_dic = {}
     rev,rev0,rev2,rev3=False,False,False,False
@@ -442,7 +408,6 @@ def MainBE(upSeq, downSeq, mutation, wt, readingFrame,personalPAM,start,end,from
         check_match3=matchBE(snp3,BElist3)
     except:
         pass
-    print (rev,rev0,rev2,rev3)
     #check for clean match
     try:
         clean_dic,quiet_dic,origMutSeq, locations_dic,orig_protein= cleanMatch(snp, check_match, BElist,rev)
@@ -450,10 +415,19 @@ def MainBE(upSeq, downSeq, mutation, wt, readingFrame,personalPAM,start,end,from
         clean_dic = {}
         quiet_dic = {}
         orig_protein = origPro(snp, rev)
+
     try:
-
+        clean_dic_m, quiet_dic_m, origMutSeq_m, locations_dic_m, orig_protein_m = cleanMatch(snp, check_match_minor, MinorBElist, rev)
+        for BE in clean_dic_m:
+            if BE in clean_dic:
+                minor_clean_list.append(BE)
+        for BE in clean_dic_m:
+            if BE in clean_dic:
+                minor_quiet_list.append(BE)
+    except:
+        pass
+    try:
         clean_dic0,quiet_dic0,origMutSeq0,locations_dic0 = SpecialCleanMatch(snp0, check_match0, BElist0, rev0, orig_protein)
-
     except:
         quiet_dic0={}
     try:
@@ -464,7 +438,7 @@ def MainBE(upSeq, downSeq, mutation, wt, readingFrame,personalPAM,start,end,from
         clean_dic3,quiet_dic3,origMutSeq3,locations_dic3 = SpecialCleanMatch(snp3, check_match3, BElist3, rev3, orig_protein)
     except:
         quiet_dic3={}
-
+    ## FOR VISUAL OUTPUT
     syn_quiet={}
     for key in quiet_dic0:
         if key in quiet_dic:
@@ -478,17 +452,17 @@ def MainBE(upSeq, downSeq, mutation, wt, readingFrame,personalPAM,start,end,from
             for loc in quiet_dic2[key][5]:
                 if loc not in quiet_dic[key][5]:
                     syn_quiet.update({key: quiet_dic2[key]})
-        else:
+        elif key not in syn_quiet:
             syn_quiet.update({key: quiet_dic2[key]})
     for key in quiet_dic3:
         if key in quiet_dic:
             for loc in quiet_dic3[key][5]:
                 if loc not in quiet_dic[key][5]:
                     syn_quiet.update({key:quiet_dic3[key]})
-        else:
+        elif key not in syn_quiet:
             syn_quiet.update({key: quiet_dic3[key]})
     try:
-        return clean_dic, quiet_dic,refSeq,mutSeq, origMutSeq,locations_dic,syn_quiet,check_match_minor
+        return clean_dic, quiet_dic,refSeq,mutSeq, origMutSeq,locations_dic,syn_quiet,minor_clean_list,minor_quiet_list
     except:
         return [],[],[],[],[],[],[],[]
 

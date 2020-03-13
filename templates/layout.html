@@ -1,7 +1,14 @@
+{#AUTHOR: Shiri Almog , shirialmog1@gmail.com#}
 <!DOCTYPE html>
 <html lang="en">
+<html prefix="og: http://ogp.me/ns#">
 <head>
-    <link  href="favicon.ico" rel="icon" type="image/x-icon/">
+    <meta property="og:title" content="BE-FF" />
+    <meta property="og:type" content="image/jpeg" />
+    <meta property="og:url" content="http://danioffenlab.pythonanywhere.com/" />
+    <meta property="og:image" content="https://ifsi.org.il/wp-content/uploads/2019/06/dna-old-murder.jpg" />
+     <link rel="shortcut icon" href="{{ url_for('static',filename='favicon.ico')}}">
+{#    <link  href="favicon.ico" rel="icon" type="image/x-icon/">#}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- Bootstrap CSS -->
@@ -29,10 +36,10 @@
           <div class="collapse navbar-collapse" id="navbarToggle">
             <div class="navbar-nav mr-auto">
               <a class="nav-item nav-link" href="/">Home</a>
-{#                <a class="nav-item nav-link" href="/input">Base Editors</a>#}
-{#                <a class="nav-item nav-link" href="/crisPAM">crisPAM</a>#}
-                <a class="nav-item nav-link" href="/help">Help</a>
+                <a class="nav-item nav-link" href="/DB">DB</a>
                 <a class="nav-item nav-link" href="/contact">About</a>
+                <a class="nav-item nav-link" href="/help">Help</a>
+
 
             </div>
             <!-- Navbar Right Side -->
@@ -64,7 +71,6 @@
         <div class="container">
           <p class="m-0 text-center text-white">Copyright &copy; Dani Offen Group, Tel-Aviv University 2019</p>
         </div>
-        <!-- /.container -->
       </footer>
 {#<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>#}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>

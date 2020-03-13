@@ -1,0 +1,23 @@
+{#AUTHOR: Shiri Almog , shirialmog1@gmail.com#}
+{% extends "layout.html" %}
+{% block content %}
+
+    <div class="content-section col-12">
+    <legend class="border-bottom mb-3">BE-FF Database</legend>
+    <p> The BE-FF database contains analyzed data of human pathogenic SNVs from NCBI dbSNP.
+        For each represented point mutation in the database, BE-FF found a possible base editing correction. </p>
+    <p> The positive results are indicated as ‘Precise’ or ‘Synonymous’ corrections under the
+    relevant base editor. SNPs that do not appear in the database are not necessarily incompatible
+    for base editing, they might not be included in the original dataset as well. Please check the
+    “Original_dataset.csv” file to find whether your mutation of interest appears in it or not,
+    in case it can’t be found in the BE-FF db. </p>
+
+    <a href="screenshot" target="_blank" ><img src="./static/open_screenshot.png" width="300" height="200" alt="BEFF"> </a>
+    <br>
+    <br>
+    <a href="/return_file_DB/" ><button class="btn btn-link ">BE-FF DB</button> </a>
+    <br>
+    <a href="/return_file_orig/"  ><button class="btn btn-link ">Original data (CSV)</button> </a>
+    </div>
+
+{% endblock %}
