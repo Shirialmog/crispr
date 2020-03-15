@@ -24,10 +24,6 @@
 * [BEMain.py](#BEMain.py)
 * [Contact](#contact)
 
-
-
-
-
 <!-- ABOUT  -->
 ## ABOUT
 
@@ -79,9 +75,9 @@ To get a local copy up and running follow these simple steps.
 ```sh
 git clone https://github.com/RoyRabinowitz/BE-FF
 ```
-2. Install NPM packages
+2. Install biopython packages
 ```sh
-biopython install
+pip install biopython 
 ```
 
 <!-- CONTACT -->
