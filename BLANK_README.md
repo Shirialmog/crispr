@@ -18,18 +18,18 @@
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
 
-* [About](#about-the-project)
-  * [Built With](#built-with)
-* [Methods to enter Dara](#getting-started)
-  * [Prerequisites](#prerequisites)
-  * [Installation](#installation)
-* [Usage](#usage)
+* [About](#ABOUT)
+* [BEsingle.py](#built-with)
+  * [Methods to Enter Data](#methods)
+* [BEMain.py](#BEMain.py)
 * [Contact](#contact)
 
 
 
 
+
 <!-- ABOUT  -->
+## ABOUT
 
 BE-FF is a web-based tool that receives SNV data and matches suitable BEs to correct the
 variation. The code for the online tool is available here, as well as batch-mode code that may be used
@@ -43,15 +43,15 @@ This is the main script of the website. It receives a single SNV, via 3 possible
 * <i> Manually entered by user:</i> <br> Here you must enter a 51-nt long DNA sequence, 25 nt upstream to the mutation and 25 nt downstream, as well as the variation and the reading frame. 
 ![method1](method1.PNG)
  
-* <i> Fetched from given rsID: </i> Enters a known rsID. You will then be presented with a table containing all the possible variations. Once you selects one of the options, it will automatically be inserted into the format in (a). 
+* <i> Fetched by given rsID: </i> Enters a known rsID. You will then be presented with a table containing all the possible variations. Once you selects one of the options, it will automatically be inserted into the format in (a). 
 ![method2](method2.PNG)
 
-* <i> Fetched by genomic coordinates: </i> You may select a genome, chromosome number, mutation position, variation, and reading frame, which will be inserted into the format in (a).
+* <i> Fetche by genomic coordinates: </i> You may select a genome, chromosome number, mutation position, variation, and reading frame, which will be inserted into the format in (a).
 ![method3](method3.PNG) 
 
 **Note: Only one of these methods is required each time. **
  
-You may also use the 'Advanced Options' button and create you own BE. This base editor will appear as
+You may also use the **'Advanced Options'** button and create you own BE. This base editor will appear as
 'User customized BE' in the final results
 
 Press the <u> submit </u> button to show the results. You will be presented with two tables:
