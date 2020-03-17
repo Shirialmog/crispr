@@ -80,6 +80,47 @@ git clone https://github.com/RoyRabinowitz/BE-FF
 pip install biopython 
 ```
 
+
+## Main Functions
+
+ ### `matchBE`(snp, BElist)
+
+Recieves an snp object and returns a list of all matching BE that correct the mutation,
+as well as a dictionary with all the possible locations (may be a few locations per BE) 
+
+#### Parameters:
+
+*   **snp** – snp object, has attributes such as snp.mutation, snp.wildtype, snp.upstream_sequence, snp.downstream_sequence
+*   **BElist** – dictionary of the shape   
+{BE: [PAM,activation window start,activation window end, mutation,variation, upstream/downstream]} 
+
+ ### `cleanMatch`(snp,Matches, BElist,rev)
+ Finds BE that will result in a prefect correction or a synonymous one (i.e. same smino acid)
+
+#### Parameters:
+*   **snp** - snp object
+*   **Matches** - list recieved from previous function
+*   **BElist** - dictionary of BE
+*   **rev** - bool. whether the PAM is found on the given DNA strand or on its reverse complement.  
+
+### `getRevComp`(snp)
+Finds reverse complement of the SNP object, including changing its attirbutes respectively 
+
+#### Parameters:
+*   **snp** - snp object
+
+### `SpecialCleanMatch`(snp, Matches, BElist, rev, orig_protein)
+Finds BE that may correct the mutation by changing a base that is not the mutation. 
+when the final amino acid is the same as the original
+
+#### Parameters:
+*   **snp** - snp object
+*   **Matches** - list received from previous function
+*   **BElist** - dictionary of BE
+*   **rev** - bool.
+*   **orig_protein** - the original amino acid sequence, to be compared with the final one 
+
+
 <!-- CONTACT -->
 ## Contact
 
